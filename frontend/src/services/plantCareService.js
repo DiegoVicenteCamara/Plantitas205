@@ -15,3 +15,23 @@ export async function fetchPlantCare(payload) {
 
 	return response.json();
 }
+
+export async function searchPlants(query) {
+	const response = await fetch(`${API_BASE_URL}/api/plants/search?q=${encodeURIComponent(query)}`);
+
+	if (!response.ok) {
+		throw new Error("Request failed");
+	}
+
+	return response.json();
+}
+
+export async function fetchPlantSuggestions(prefix) {
+	const response = await fetch(`${API_BASE_URL}/api/plants/suggestions?prefix=${encodeURIComponent(prefix)}`);
+
+	if (!response.ok) {
+		throw new Error("Request failed");
+	}
+
+	return response.json();
+}
