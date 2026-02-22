@@ -81,3 +81,62 @@ button:disabled {
 	display: grid;
 	gap: 0.5rem;
 }
+
+.plant-list {
+	margin-top: 1rem;
+	display: grid;
+	gap: 0.75rem;
+}
+
+.plant-card {
+	display: grid;
+	grid-template-columns: 64px 1fr;
+	gap: 0.75rem;
+	align-items: center;
+	background: #f7faf6;
+	border-radius: 12px;
+	padding: 0.75rem;
+}
+
+.plant-card img {
+	width: 64px;
+	height: 64px;
+	object-fit: cover;
+	border-radius: 10px;
+}
+
+.plant-title {
+	margin: 0;
+	font-weight: 700;
+}
+
+.plant-meta {
+	margin: 0.2rem 0 0;
+	color: #4b5b52;
+	font-size: 0.9rem;
+}
+
+.suggestions-list {
+	margin: -0.4rem 0 0;
+	padding: 0;
+	list-style: none;
+	border: 1px solid #d4dad5;
+	border-radius: 10px;
+	overflow: hidden;
+	background: #fff;
+}
+
+.suggestion-item {
+	width: 100%;
+	text-align: left;
+	background: #fff;
+	color: #1b1f1d;
+	border: none;
+	border-radius: 0;
+	padding: 0.6rem 0.75rem;
+	cursor: pointer;
+}
+
+.suggestion-item:hover {
+	background: #f0f5f1;
+}

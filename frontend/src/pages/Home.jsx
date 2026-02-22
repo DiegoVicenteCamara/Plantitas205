@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { fetchPlantCare } from "../services/plantCareService.js";
+import { useEffect, useState } from "react";
+import { fetchPlantCare, fetchPlantSuggestions, searchPlants } from "../services/plantCareService.js";
 import CitySelector from "../components/CitySelector.jsx";
 
 export default function Home() {
@@ -9,6 +9,39 @@ export default function Home() {
 	const [result, setResult] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [searchResult, setSearchResult] = useState(null);
+	const [searchLoading, setSearchLoading] = useState(false);
+	const [searchError, setSearchError] = useState("");
+	const [suggestions, setSuggestions] = useState([]);
+	const [showSuggestions, setShowSuggestions] = useState(false);
+
+	useEffect(() => {
+		const prefix = searchQuery.trim();
+		if (!prefix || !showSuggestions) {
+			setSuggestions([]);
+			return;
+		}
+
+		let cancelled = false;
+		const timeoutId = setTimeout(async () => {
+			try {
+				const response = await fetchPlantSuggestions(prefix);
+				if (!cancelled) {
+					setSuggestions(response);
+				}
+			} catch (error) {
+				if (!cancelled) {
+					setSuggestions([]);
+				}
+			}
+		}, 180);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timeoutId);
+		};
+	}, [searchQuery, showSuggestions]);
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -22,6 +55,25 @@ export default function Home() {
 			setResult(null);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handleSearch = async (event) => {
+		event.preventDefault();
+		if (!searchQuery.trim()) {
+			return;
+		}
+		setShowSuggestions(false);
+		setSearchError("");
+		setSearchLoading(true);
+		try {
+			const response = await searchPlants(searchQuery.trim());
+			setSearchResult(response);
+		} catch (err) {
+			setSearchError("No se pudo buscar en la base local.");
+			setSearchResult(null);
+		} finally {
+			setSearchLoading(false);
 		}
 	};
 
@@ -54,6 +106,69 @@ export default function Home() {
 						{loading ? "Consultando..." : "Evaluar"}
 					</button>
 				</form>
+			</section>
+
+			<section className="card">
+				<h2>Búsqueda en catálogo local</h2>
+				<form onSubmit={handleSearch} className="form">
+					<label>
+						Nombre o especie
+						<input
+							type="text"
+							value={searchQuery}
+							onChange={(event) => {
+								setSearchQuery(event.target.value);
+								setShowSuggestions(true);
+							}}
+							onFocus={() => setShowSuggestions(true)}
+							placeholder="ej: fern"
+							required
+						/>
+					</label>
+					{showSuggestions && suggestions.length > 0 && (
+						<ul className="suggestions-list">
+							{suggestions.map((name) => (
+								<li key={name}>
+									<button
+										type="button"
+										className="suggestion-item"
+										onMouseDown={(event) => event.preventDefault()}
+										onClick={() => {
+											setSearchQuery(name);
+											setShowSuggestions(false);
+											setSuggestions([]);
+										}}
+									>
+										{name}
+									</button>
+								</li>
+							))}
+						</ul>
+					)}
+					<button type="submit" disabled={searchLoading}>
+						{searchLoading ? "Buscando..." : "Buscar"}
+					</button>
+				</form>
+
+				{searchError && <p className="error">{searchError}</p>}
+				{searchResult?.data?.length === 0 && !searchError && (
+					<p>No se encontraron plantas.</p>
+				)}
+				{searchResult?.data?.length > 0 && (
+					<div className="plant-list">
+						{searchResult.data.slice(0, 8).map((plant) => (
+							<article key={plant.id} className="plant-card">
+								{plant.image_url && (
+									<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
+								)}
+								<div>
+									<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
+									<p className="plant-meta">{plant.scientific_name}</p>
+								</div>
+							</article>
+						))}
+					</div>
+				)}
 			</section>
 
 			<section className="card">
