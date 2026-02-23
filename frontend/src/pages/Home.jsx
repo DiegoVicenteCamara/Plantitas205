@@ -1,53 +1,69 @@
 import { useEffect, useState } from "react";
-import { fetchPlantCare, fetchPlantSuggestions, searchPlants } from "../services/plantCareService.js";
-import CitySelector from "../components/CitySelector.jsx";
+import { fetchPlantCare, searchPlants } from "../services/plantCareService.js";
+import MapSelector from "../components/MapSelector.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+	const navigate = useNavigate();
 	const [plantId, setPlantId] = useState("");
-	const [city, setCity] = useState("");
+	const [location, setLocation] = useState(null);
 	const [season, setSeason] = useState("primavera");
 	const [result, setResult] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [searchResult, setSearchResult] = useState(null);
+	const [searchResults, setSearchResults] = useState([]);
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [searchError, setSearchError] = useState("");
-	const [suggestions, setSuggestions] = useState([]);
-	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [showResults, setShowResults] = useState(false);
 
 	useEffect(() => {
-		const prefix = searchQuery.trim();
-		if (!prefix || !showSuggestions) {
-			setSuggestions([]);
+		const query = searchQuery.trim();
+		if (!query) {
+			setSearchResults([]);
+			setSearchLoading(false);
+			setSearchError("");
 			return;
 		}
 
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
+			setSearchLoading(true);
+			setSearchError("");
 			try {
-				const response = await fetchPlantSuggestions(prefix);
+				const response = await searchPlants(query);
 				if (!cancelled) {
-					setSuggestions(response);
+					setSearchResults(response.data ?? []);
 				}
 			} catch (error) {
 				if (!cancelled) {
-					setSuggestions([]);
+					setSearchResults([]);
+					setSearchError("No se pudo buscar en la base local.");
+				}
+			} finally {
+				if (!cancelled) {
+					setSearchLoading(false);
 				}
 			}
-		}, 180);
+		}, 300);
 
 		return () => {
 			cancelled = true;
 			clearTimeout(timeoutId);
 		};
-	}, [searchQuery, showSuggestions]);
+	}, [searchQuery]);
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
+		if (!location) {
+			setError("Selecciona una ubicación en el mapa.");
+			setResult(null);
+			return;
+		}
 		setError("");
 		setLoading(true);
 		try {
+			const city = `${location.lat.toFixed(6)},${location.lng.toFixed(6)}`;
 			const response = await fetchPlantCare({ plantId, city, season });
 			setResult(response);
 		} catch (err) {
@@ -55,25 +71,6 @@ export default function Home() {
 			setResult(null);
 		} finally {
 			setLoading(false);
-		}
-	};
-
-	const handleSearch = async (event) => {
-		event.preventDefault();
-		if (!searchQuery.trim()) {
-			return;
-		}
-		setShowSuggestions(false);
-		setSearchError("");
-		setSearchLoading(true);
-		try {
-			const response = await searchPlants(searchQuery.trim());
-			setSearchResult(response);
-		} catch (err) {
-			setSearchError("No se pudo buscar en la base local.");
-			setSearchResult(null);
-		} finally {
-			setSearchLoading(false);
 		}
 	};
 
@@ -92,7 +89,7 @@ export default function Home() {
 							required
 						/>
 					</label>
-					<CitySelector value={city} onChange={setCity} />
+					<MapSelector value={location} onChange={setLocation} />
 					<label>
 						Época del año
 						<select value={season} onChange={(event) => setSeason(event.target.value)}>
@@ -102,7 +99,7 @@ export default function Home() {
 							<option value="invierno">Invierno</option>
 						</select>
 					</label>
-					<button type="submit" disabled={loading}>
+					<button type="submit" disabled={loading || !location}>
 						{loading ? "Consultando..." : "Evaluar"}
 					</button>
 				</form>
@@ -110,7 +107,7 @@ export default function Home() {
 
 			<section className="card">
 				<h2>Búsqueda en catálogo local</h2>
-				<form onSubmit={handleSearch} className="form">
+				<div className="form">
 					<label>
 						Nombre o especie
 						<input
@@ -118,45 +115,46 @@ export default function Home() {
 							value={searchQuery}
 							onChange={(event) => {
 								setSearchQuery(event.target.value);
-								setShowSuggestions(true);
+								setShowResults(true);
 							}}
-							onFocus={() => setShowSuggestions(true)}
+							onFocus={() => setShowResults(true)}
+							onBlur={() => {
+								setTimeout(() => setShowResults(false), 120);
+							}}
 							placeholder="ej: fern"
 							required
 						/>
 					</label>
-					{showSuggestions && suggestions.length > 0 && (
+					{showResults && searchResults.length > 0 && (
 						<ul className="suggestions-list">
-							{suggestions.map((name) => (
-								<li key={name}>
+							{searchResults.map((plant) => (
+								<li key={plant.id}>
 									<button
 										type="button"
 										className="suggestion-item"
 										onMouseDown={(event) => event.preventDefault()}
 										onClick={() => {
-											setSearchQuery(name);
-											setShowSuggestions(false);
-											setSuggestions([]);
+											setShowResults(false);
+											navigate(`/planta/${plant.id}`);
 										}}
 									>
-										{name}
+										{plant.common_name ?? "Sin nombre común"}
+										{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
 									</button>
 								</li>
 							))}
 						</ul>
 					)}
-					<button type="submit" disabled={searchLoading}>
-						{searchLoading ? "Buscando..." : "Buscar"}
-					</button>
-				</form>
+					{searchLoading && <p>Buscando...</p>}
+				</div>
 
 				{searchError && <p className="error">{searchError}</p>}
-				{searchResult?.data?.length === 0 && !searchError && (
+				{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
 					<p>No se encontraron plantas.</p>
 				)}
-				{searchResult?.data?.length > 0 && (
+				{searchResults.length > 0 && (
 					<div className="plant-list">
-						{searchResult.data.slice(0, 8).map((plant) => (
+						{searchResults.slice(0, 8).map((plant) => (
 							<article key={plant.id} className="plant-card">
 								{plant.image_url && (
 									<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
