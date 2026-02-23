@@ -63,8 +63,10 @@ export default function Home() {
 		setError("");
 		setLoading(true);
 		try {
-			const city = `${location.lat.toFixed(6)},${location.lng.toFixed(6)}`;
-			const response = await fetchPlantCare({ plantId, city, season });
+			const latitude = location.lat;
+			const longitude = location.lng;
+			const city = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+			const response = await fetchPlantCare({ plantId, city, season, latitude, longitude });
 			setResult(response);
 		} catch (err) {
 			setError("No se pudo obtener la recomendación.");
