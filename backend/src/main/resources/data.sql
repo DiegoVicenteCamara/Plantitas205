@@ -99,71 +99,38 @@ SET
 		WHEN 'aloe-vera' THEN '25-45%'
 		ELSE ideal_humidity
 	END,
-	ideal_temperature_min = CASE slug
-		WHEN 'monstera' THEN 20.0
-		WHEN 'maranta' THEN 18.0
-		WHEN 'margarita' THEN 10.0
-		WHEN 'magnolia' THEN 12.0
-		WHEN 'malva' THEN 12.0
-		WHEN 'menta' THEN 14.0
-		WHEN 'manzanilla' THEN 12.0
-		WHEN 'madreselva' THEN 10.0
-		WHEN 'pothos' THEN 18.0
-		WHEN 'helecho-boston' THEN 16.0
-		WHEN 'ficus-elastica' THEN 18.0
-		WHEN 'ficus-lyrata' THEN 18.0
-		WHEN 'cactus' THEN 18.0
-		WHEN 'sansevieria' THEN 15.0
-		WHEN 'anturio' THEN 18.0
-		WHEN 'begonia' THEN 16.0
-		WHEN 'calathea' THEN 18.0
-		WHEN 'spathiphyllum' THEN 18.0
-		WHEN 'geranio' THEN 12.0
-		WHEN 'hortensia' THEN 12.0
-		WHEN 'jazmin' THEN 14.0
-		WHEN 'lavender' THEN 12.0
-		WHEN 'albahaca' THEN 18.0
-		WHEN 'orquidea' THEN 18.0
-		WHEN 'romero' THEN 12.0
-		WHEN 'tomillo' THEN 10.0
-		WHEN 'violeta-africana' THEN 18.0
-		WHEN 'yucca' THEN 16.0
-		WHEN 'zamioculca' THEN 18.0
-		WHEN 'aloe-vera' THEN 18.0
-		ELSE ideal_temperature_min
-	END,
-	ideal_temperature_max = CASE slug
-		WHEN 'monstera' THEN 28.0
-		WHEN 'maranta' THEN 27.0
-		WHEN 'margarita' THEN 24.0
-		WHEN 'magnolia' THEN 26.0
-		WHEN 'malva' THEN 25.0
-		WHEN 'menta' THEN 24.0
-		WHEN 'manzanilla' THEN 24.0
-		WHEN 'madreselva' THEN 25.0
-		WHEN 'pothos' THEN 30.0
-		WHEN 'helecho-boston' THEN 24.0
-		WHEN 'ficus-elastica' THEN 28.0
-		WHEN 'ficus-lyrata' THEN 27.0
-		WHEN 'cactus' THEN 32.0
-		WHEN 'sansevieria' THEN 30.0
-		WHEN 'anturio' THEN 28.0
-		WHEN 'begonia' THEN 26.0
-		WHEN 'calathea' THEN 27.0
-		WHEN 'spathiphyllum' THEN 27.0
-		WHEN 'geranio' THEN 26.0
-		WHEN 'hortensia' THEN 24.0
-		WHEN 'jazmin' THEN 28.0
-		WHEN 'lavender' THEN 30.0
-		WHEN 'albahaca' THEN 30.0
-		WHEN 'orquidea' THEN 28.0
-		WHEN 'romero' THEN 30.0
-		WHEN 'tomillo' THEN 30.0
-		WHEN 'violeta-africana' THEN 26.0
-		WHEN 'yucca' THEN 30.0
-		WHEN 'zamioculca' THEN 30.0
-		WHEN 'aloe-vera' THEN 30.0
-		ELSE ideal_temperature_max
+	ideal_temperature = CASE slug
+		WHEN 'monstera' THEN '20-28 °C'
+		WHEN 'maranta' THEN '18-27 °C'
+		WHEN 'margarita' THEN '10-24 °C'
+		WHEN 'magnolia' THEN '12-26 °C'
+		WHEN 'malva' THEN '12-25 °C'
+		WHEN 'menta' THEN '14-24 °C'
+		WHEN 'manzanilla' THEN '12-24 °C'
+		WHEN 'madreselva' THEN '10-25 °C'
+		WHEN 'pothos' THEN '18-30 °C'
+		WHEN 'helecho-boston' THEN '16-24 °C'
+		WHEN 'ficus-elastica' THEN '18-28 °C'
+		WHEN 'ficus-lyrata' THEN '18-27 °C'
+		WHEN 'cactus' THEN '18-32 °C'
+		WHEN 'sansevieria' THEN '15-30 °C'
+		WHEN 'anturio' THEN '18-28 °C'
+		WHEN 'begonia' THEN '16-26 °C'
+		WHEN 'calathea' THEN '18-27 °C'
+		WHEN 'spathiphyllum' THEN '18-27 °C'
+		WHEN 'geranio' THEN '12-26 °C'
+		WHEN 'hortensia' THEN '12-24 °C'
+		WHEN 'jazmin' THEN '14-28 °C'
+		WHEN 'lavender' THEN '12-30 °C'
+		WHEN 'albahaca' THEN '18-30 °C'
+		WHEN 'orquidea' THEN '18-28 °C'
+		WHEN 'romero' THEN '12-30 °C'
+		WHEN 'tomillo' THEN '10-30 °C'
+		WHEN 'violeta-africana' THEN '18-26 °C'
+		WHEN 'yucca' THEN '16-30 °C'
+		WHEN 'zamioculca' THEN '18-30 °C'
+		WHEN 'aloe-vera' THEN '18-30 °C'
+		ELSE ideal_temperature
 	END,
 	toxicidad = CASE slug
 		WHEN 'monstera' THEN 'Moderada para mascotas'

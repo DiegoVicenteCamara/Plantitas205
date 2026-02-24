@@ -15,6 +15,14 @@
 	--space-md: 1rem;
 	--space-lg: 1.5rem;
 	--space-xl: 2rem;
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--motion-fast: 160ms;
+	--easing-standard: ease;
+	--focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-accent-leaf) 40%, transparent);
+	--shadow-soft: 0 8px 20px color-mix(in srgb, var(--color-text) 10%, transparent);
+	--shadow-press: 0 3px 10px color-mix(in srgb, var(--color-text) 14%, transparent);
 
 	--color-card-shadow: rgba(0, 0, 0, 0.08);
 	--color-input-bg: #ffffff;
@@ -31,6 +39,10 @@
 	--color-toggle-bg: #e5ebe6;
 	--color-toggle-border: #cdd7cf;
 	--color-toggle-text: #1b1f1d;
+	--color-control-border: var(--color-input-border);
+	--color-control-hover-border: color-mix(in srgb, var(--color-primary) 45%, var(--color-input-border));
+	--color-link: var(--color-primary);
+	--color-link-hover: var(--color-accent-leaf);
 
 	color: var(--color-text);
 	background: var(--color-bg);
@@ -59,6 +71,10 @@
 	--color-toggle-bg: #2b3833;
 	--color-toggle-border: #42544b;
 	--color-toggle-text: #e7efea;
+	--color-control-border: var(--color-input-border);
+	--color-control-hover-border: color-mix(in srgb, var(--color-primary) 52%, var(--color-input-border));
+	--color-link: #85d8ac;
+	--color-link-hover: #9ae5ba;
 }
 
 *,
@@ -108,12 +124,30 @@ body {
 }
 
 .theme-toggle {
-	padding: calc(var(--space-sm) + 0.05rem) calc(var(--space-md) - 0.1rem);
-	border-radius: 10px;
-	border: 1px solid var(--color-toggle-border);
-	background: var(--color-toggle-bg);
-	color: var(--color-toggle-text);
-	font-weight: 600;
+	white-space: nowrap;
+}
+
+a {
+	color: var(--color-link);
+	text-decoration: none;
+	transition:
+		color var(--motion-fast) var(--easing-standard),
+		text-shadow var(--motion-fast) var(--easing-standard),
+		transform var(--motion-fast) var(--easing-standard);
+}
+
+a:hover {
+	color: var(--color-link-hover);
+}
+
+a:active {
+	transform: translateY(1px);
+}
+
+a:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+	border-radius: var(--radius-sm);
 }
 
 .content {
@@ -124,7 +158,7 @@ body {
 
 .card {
 	background: var(--color-surface);
-	border-radius: 16px;
+	border-radius: var(--radius-lg);
 	padding: var(--space-lg);
 	box-shadow: 0 10px 30px var(--color-card-shadow);
 }
@@ -145,23 +179,86 @@ select {
 	background: var(--color-input-bg);
 	color: var(--color-text);
 	padding: calc(var(--space-sm) + 0.1rem) calc(var(--space-sm) + 0.25rem);
-	border-radius: 10px;
+	border-radius: var(--radius-sm);
 	border: 1px solid var(--color-input-border);
+	transition:
+		border-color var(--motion-fast) var(--easing-standard),
+		box-shadow var(--motion-fast) var(--easing-standard),
+		background-color var(--motion-fast) var(--easing-standard);
 }
 
+input:hover,
+select:hover {
+	border-color: var(--color-control-hover-border);
+}
+
+input:focus-visible,
+select:focus-visible {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: var(--focus-ring);
+}
+
+.btn,
 button {
-	padding: calc(var(--space-sm) + 0.25rem);
-	border-radius: 12px;
-	border: none;
-	background: var(--color-button-bg);
-	color: var(--color-button-text);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-xs);
+	padding: calc(var(--space-sm) + 0.25rem) var(--space-md);
+	border-radius: var(--radius-md);
+	border: 1px solid transparent;
+	font-family: inherit;
+	font-size: 0.95rem;
 	font-weight: 600;
+	line-height: 1.2;
 	cursor: pointer;
+	text-decoration: none;
+	transition:
+		background-color var(--motion-fast) var(--easing-standard),
+		border-color var(--motion-fast) var(--easing-standard),
+		color var(--motion-fast) var(--easing-standard),
+		box-shadow var(--motion-fast) var(--easing-standard),
+		transform var(--motion-fast) var(--easing-standard);
+}
+
+.btn--primary {
+	background: var(--color-primary);
+	border-color: var(--color-primary);
+	color: var(--color-button-text);
+}
+
+.btn--secondary {
+	background: var(--color-toggle-bg);
+	border-color: var(--color-toggle-border);
+	color: var(--color-toggle-text);
+}
+
+.btn--primary:hover,
+.btn--secondary:hover,
+button:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-soft);
+}
+
+.btn--primary:active,
+.btn--secondary:active,
+button:active {
+	transform: translateY(0);
+	box-shadow: var(--shadow-press);
+}
+
+.btn:focus-visible,
+button:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
 }
 
 button:disabled {
 	opacity: 0.7;
-	cursor: wait;
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
 }
 
 .error {
@@ -181,8 +278,8 @@ button:disabled {
 }
 
 .plant-card-link {
-	text-decoration: none;
 	color: inherit;
+	border-radius: var(--radius-md);
 }
 
 .plant-card {
@@ -191,8 +288,18 @@ button:disabled {
 	gap: calc(var(--space-sm) + 0.25rem);
 	align-items: center;
 	background: var(--color-plant-card-bg);
-	border-radius: 12px;
+	border-radius: var(--radius-md);
 	padding: calc(var(--space-sm) + 0.25rem);
+	transition:
+		background-color var(--motion-fast) var(--easing-standard),
+		box-shadow var(--motion-fast) var(--easing-standard),
+		transform var(--motion-fast) var(--easing-standard);
+}
+
+.plant-card-link:hover .plant-card,
+.plant-card-link:focus-visible .plant-card {
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-soft);
 }
 
 .plant-card img {
@@ -241,7 +348,7 @@ button:disabled {
 	background: var(--color-conditions-bg);
 	color: var(--color-conditions-text);
 	padding: calc(var(--space-md) + var(--space-xs));
-	border-radius: 12px;
+	border-radius: var(--radius-md);
 	display: grid;
 	gap: calc(var(--space-sm) + 0.35rem);
 }
@@ -256,6 +363,10 @@ button:disabled {
 	color: var(--color-conditions-text);
 }
 
+.plant-detail-back-button {
+	margin-top: var(--space-lg);
+}
+
 @media (min-width: 900px) {
 	.plant-detail-layout {
 		grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
@@ -265,12 +376,62 @@ button:disabled {
 
 .suggestions-list {
 	margin: calc(var(--space-sm) * -0.8) 0 0;
-	padding: 0;
+	padding: var(--space-xs);
 	list-style: none;
 	border: 1px solid var(--color-input-border);
-	border-radius: 10px;
+	border-radius: var(--radius-md);
 	overflow: hidden;
 	background: var(--color-suggestion-bg);
+	box-shadow: 0 10px 24px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.suggestions-list li + li {
+	border-top: 1px solid color-mix(in srgb, var(--color-input-border) 75%, transparent);
+}
+
+.search-input-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--color-input-border);
+	border-radius: var(--radius-md);
+	background: var(--color-input-bg);
+	box-shadow: 0 2px 6px color-mix(in srgb, var(--color-text) 8%, transparent);
+	transition:
+		border-color var(--motion-fast) var(--easing-standard),
+		box-shadow var(--motion-fast) var(--easing-standard),
+		transform var(--motion-fast) var(--easing-standard);
+}
+
+.search-input-wrapper:hover {
+	border-color: var(--color-control-hover-border);
+}
+
+.search-input-wrapper:focus-within {
+	border-color: var(--color-primary);
+	box-shadow: var(--focus-ring);
+}
+
+.search-input-icon {
+	position: absolute;
+	left: var(--space-sm);
+	color: var(--color-text-muted);
+	font-size: 0.95rem;
+	pointer-events: none;
+}
+
+.search-input {
+	width: 100%;
+	border: none;
+	box-shadow: none;
+	padding-left: calc(var(--space-xl) + var(--space-xs));
+	background: transparent;
+}
+
+.search-input:hover,
+.search-input:focus-visible {
+	border: none;
+	box-shadow: none;
 }
 
 .suggestion-item {
@@ -282,9 +443,24 @@ button:disabled {
 	border-radius: 0;
 	padding: calc(var(--space-sm) + 0.1rem) calc(var(--space-sm) + 0.25rem);
 	cursor: pointer;
+	font-weight: 500;
+	transition:
+		background-color var(--motion-fast) var(--easing-standard),
+		color var(--motion-fast) var(--easing-standard),
+		transform var(--motion-fast) var(--easing-standard);
 }
 
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item--active,
+.suggestion-item[aria-selected="true"] {
+	background: var(--color-suggestion-hover);
+	transform: none;
+	box-shadow: none;
+}
+
+.suggestion-item:focus-visible {
+	outline: none;
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 65%, transparent);
 	background: var(--color-suggestion-hover);
 }
 

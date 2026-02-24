@@ -21,8 +21,7 @@ class PlantTest {
 		setField(plant, "lightRecommendation", "Luz indirecta");
 		setField(plant, "idealClimate", "Tropical húmedo");
 		setField(plant, "idealHumidity", "60-80%");
-		setField(plant, "idealTemperatureMin", 20.0);
-		setField(plant, "idealTemperatureMax", 28.0);
+		setField(plant, "idealTemperature", "20-28 °C");
 		setField(plant, "toxicidad", "Moderada para mascotas");
 
 		assertEquals(15L, plant.getId());
@@ -35,8 +34,7 @@ class PlantTest {
 		assertEquals("Luz indirecta", plant.getLightRecommendation());
 		assertEquals("Tropical húmedo", plant.getIdealClimate());
 		assertEquals("60-80%", plant.getIdealHumidity());
-		assertEquals(20.0, plant.getIdealTemperatureMin());
-		assertEquals(28.0, plant.getIdealTemperatureMax());
+		assertEquals("20-28 °C", plant.getIdealTemperature());
 		assertEquals("Moderada para mascotas", plant.getToxicidad());
 	}
 

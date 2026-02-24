@@ -27,19 +27,6 @@ export default function PlantDetail() {
 		return "Desconocido";
 	};
 
-	const toTemperatureRangeDisplay = (min, max) => {
-		if (min === null && max === null) {
-			return "Desconocido";
-		}
-		if (min !== null && max !== null) {
-			return `${min}-${max} °C`;
-		}
-		if (min !== null) {
-			return `Desde ${min} °C`;
-		}
-		return `Hasta ${max} °C`;
-	};
-
 	useEffect(() => {
 		let cancelled = false;
 
@@ -99,12 +86,11 @@ export default function PlantDetail() {
 							<p><strong>Clima:</strong> {toDisplayValue(plant.ideal_climate)}</p>
 							<p><strong>Temperatura ideal:</strong> {toDisplayValue(plant.ideal_temperature)}</p>
 							<p><strong>Humedad ideal:</strong> {toDisplayValue(plant.ideal_humidity)}</p>
-							<p><strong>Rango térmico ideal:</strong> {toTemperatureRangeDisplay(plant.ideal_temperature_min, plant.ideal_temperature_max)}</p>
 							<p><strong>Toxicidad:</strong> {toDisplayValue(plant.toxicidad)}</p>
 						</aside>
 					</div>
 				)}
-				<button type="button" onClick={() => navigate("/")}>Volver al Home</button>
+				<button type="button" className="btn btn--secondary plant-detail-back-button" onClick={() => navigate("/")}>Volver al Home</button>
 			</section>
 		</main>
 	);

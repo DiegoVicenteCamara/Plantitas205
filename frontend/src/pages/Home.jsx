@@ -16,6 +16,7 @@ export default function Home() {
 	const [searchLoading, setSearchLoading] = useState(false);
 	const [searchError, setSearchError] = useState("");
 	const [showResults, setShowResults] = useState(false);
+	const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
 	useEffect(() => {
 		const query = searchQuery.trim();
@@ -52,6 +53,46 @@ export default function Home() {
 			clearTimeout(timeoutId);
 		};
 	}, [searchQuery]);
+
+	useEffect(() => {
+		setActiveSuggestionIndex(-1);
+	}, [searchResults, showResults]);
+
+	const handleSearchKeyDown = (event) => {
+		if (!showResults || searchResults.length === 0) {
+			return;
+		}
+
+		if (event.key === "ArrowDown") {
+			event.preventDefault();
+			setActiveSuggestionIndex((previousIndex) =>
+				previousIndex < searchResults.length - 1 ? previousIndex + 1 : 0
+			);
+			return;
+		}
+
+		if (event.key === "ArrowUp") {
+			event.preventDefault();
+			setActiveSuggestionIndex((previousIndex) =>
+				previousIndex > 0 ? previousIndex - 1 : searchResults.length - 1
+			);
+			return;
+		}
+
+		if (event.key === "Enter" && activeSuggestionIndex >= 0) {
+			event.preventDefault();
+			const selectedPlant = searchResults[activeSuggestionIndex];
+			if (selectedPlant) {
+				setShowResults(false);
+				navigate(`/planta/${selectedPlant.id}`);
+			}
+			return;
+		}
+
+		if (event.key === "Escape") {
+			setShowResults(false);
+		}
+	};
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -100,7 +141,7 @@ export default function Home() {
 							<option value="invierno">Invierno</option>
 						</select>
 					</label>
-					<button type="submit" disabled={loading || !location}>
+					<button type="submit" className="btn btn--primary" disabled={loading || !location}>
 						{loading ? "Consultando..." : "Evaluar"}
 					</button>
 				</form>
@@ -111,33 +152,48 @@ export default function Home() {
 				<div className="form">
 					<label>
 						Nombre o especie
-						<input
-							type="text"
-							value={searchQuery}
-							onChange={(event) => {
-								setSearchQuery(event.target.value);
-								setShowResults(true);
-							}}
-							onFocus={() => setShowResults(true)}
-							onBlur={() => {
-								setTimeout(() => setShowResults(false), 120);
-							}}
-							placeholder="ej: fern"
-							required
-						/>
+						<div className="search-input-wrapper">
+							<span className="search-input-icon" aria-hidden="true">⌕</span>
+							<input
+								type="text"
+								className="search-input"
+								value={searchQuery}
+								onChange={(event) => {
+									setSearchQuery(event.target.value);
+									setShowResults(true);
+									setActiveSuggestionIndex(-1);
+								}}
+								onFocus={() => setShowResults(true)}
+								onBlur={() => {
+									setTimeout(() => setShowResults(false), 120);
+								}}
+								onKeyDown={handleSearchKeyDown}
+								placeholder="ej: fern"
+								required
+								role="combobox"
+								aria-expanded={showResults && searchResults.length > 0}
+								aria-controls="plant-search-suggestions"
+								aria-autocomplete="list"
+								aria-activedescendant={activeSuggestionIndex >= 0 ? `plant-suggestion-${searchResults[activeSuggestionIndex]?.id}` : undefined}
+							/>
+						</div>
 					</label>
 					{showResults && searchResults.length > 0 && (
-						<ul className="suggestions-list">
-							{searchResults.map((plant) => (
+						<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
+							{searchResults.map((plant, index) => (
 								<li key={plant.id}>
 									<button
 										type="button"
-										className="suggestion-item"
+										id={`plant-suggestion-${plant.id}`}
+										className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
+										onMouseEnter={() => setActiveSuggestionIndex(index)}
 										onMouseDown={(event) => event.preventDefault()}
 										onClick={() => {
 											setShowResults(false);
 											navigate(`/planta/${plant.id}`);
 										}}
+										role="option"
+										aria-selected={activeSuggestionIndex === index}
 									>
 										{plant.common_name ?? "Sin nombre común"}
 										{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
