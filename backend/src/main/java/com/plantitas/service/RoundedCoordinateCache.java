@@ -27,9 +27,14 @@ class RoundedCoordinateCache<T> {
 
 		T computedValue = supplier.get();
 		cacheEntries.put(key, new CacheEntry<>(computedValue, now + ttlMillis));
+		purgeExpiredEntries();
 		return computedValue;
 	}
 
+	private void purgeExpiredEntries() {
+		long now = System.currentTimeMillis();
+		cacheEntries.entrySet().removeIf(entry -> entry.getValue().expiresAtMillis() <= now);
+	}
 	private String buildKey(double latitude, double longitude) {
 		double roundedLatitude = round(latitude);
 		double roundedLongitude = round(longitude);
