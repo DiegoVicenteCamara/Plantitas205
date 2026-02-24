@@ -10,11 +10,22 @@ export default function App() {
 		if (typeof window === "undefined") {
 			return false;
 		}
-		return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark";
+		const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+		const prefersDark = storedTheme === "dark";
+
+		if (prefersDark && typeof document !== "undefined") {
+			document.documentElement.classList.add("dark-theme");
+		}
+
+		return prefersDark;
 	});
 
 	useEffect(() => {
 		window.localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? "dark" : "light");
+
+		if (typeof document !== "undefined") {
+			document.documentElement.classList.toggle("dark-theme", isDarkMode);
+		}
 	}, [isDarkMode]);
 
 	return (
