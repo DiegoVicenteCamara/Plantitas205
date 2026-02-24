@@ -334,6 +334,7 @@ class PlantCareServiceTest {
 	@Test
 	void searchPlants_mapsRepositoryEntitiesToDto() {
 		Plant plant = createPlant(7L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
+		setField(plant, "imageUrl", "https://img.test/aloe.jpg");
 		when(plantRepository.findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc("aloe", "aloe"))
 			.thenReturn(List.of(plant));
 
@@ -382,6 +383,11 @@ class PlantCareServiceTest {
 		assertNull(result.ideal_climate());
 		assertNull(result.ideal_temperature());
 		assertNull(result.ideal_humidity());
+		assertNull(result.requerimientos_luz());
+		assertNull(result.frecuencia_riego());
+		assertNull(result.temperatura_ideal_min());
+		assertNull(result.temperatura_ideal_max());
+		assertNull(result.toxicidad());
 	}
 
 	@Test

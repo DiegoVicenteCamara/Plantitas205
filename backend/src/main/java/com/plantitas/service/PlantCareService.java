@@ -141,7 +141,12 @@ public class PlantCareService {
 			plant.getLightRecommendation(),
 			plant.getIdealClimate(),
 			plant.getIdealTemperature(),
-			plant.getIdealHumidity()
+			plant.getIdealHumidity(),
+			plant.getRequerimientosLuz(),
+			plant.getFrecuenciaRiego(),
+			plant.getTemperaturaIdealMin(),
+			plant.getTemperaturaIdealMax(),
+			plant.getToxicidad()
 		);
 	}
 

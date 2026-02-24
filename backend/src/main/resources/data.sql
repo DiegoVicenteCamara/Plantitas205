@@ -131,4 +131,169 @@ SET
 		WHEN 'zamioculca' THEN '30-50%'
 		WHEN 'aloe-vera' THEN '25-45%'
 		ELSE ideal_humidity
+	END,
+	requerimientos_luz = CASE slug
+		WHEN 'monstera' THEN 'Luz indirecta brillante'
+		WHEN 'maranta' THEN 'Luz media indirecta'
+		WHEN 'margarita' THEN 'Sol directo o semisombra luminosa'
+		WHEN 'magnolia' THEN 'Sol suave con buena ventilación'
+		WHEN 'malva' THEN 'Pleno sol'
+		WHEN 'menta' THEN 'Luz abundante sin sol extremo continuo'
+		WHEN 'manzanilla' THEN 'Sol directo'
+		WHEN 'madreselva' THEN 'Sol o semisombra'
+		WHEN 'pothos' THEN 'Sombra parcial a luz indirecta'
+		WHEN 'helecho-boston' THEN 'Luz indirecta y ambiente fresco'
+		WHEN 'ficus-elastica' THEN 'Luz brillante filtrada'
+		WHEN 'ficus-lyrata' THEN 'Luz intensa indirecta'
+		WHEN 'cactus' THEN 'Sol directo varias horas'
+		WHEN 'sansevieria' THEN 'Tolera baja luz, prefiere luz media'
+		WHEN 'anturio' THEN 'Luz indirecta brillante'
+		WHEN 'begonia' THEN 'Luz indirecta abundante'
+		WHEN 'calathea' THEN 'Luz media sin sol directo'
+		WHEN 'spathiphyllum' THEN 'Luz media a baja'
+		WHEN 'geranio' THEN 'Sol directo'
+		WHEN 'hortensia' THEN 'Semisombra luminosa'
+		WHEN 'jazmin' THEN 'Sol parcial o completo'
+		WHEN 'lavender' THEN 'Sol directo varias horas'
+		WHEN 'albahaca' THEN 'Sol suave o luz intensa indirecta'
+		WHEN 'orquidea' THEN 'Luz brillante sin sol directo'
+		WHEN 'romero' THEN 'Pleno sol'
+		WHEN 'tomillo' THEN 'Pleno sol'
+		WHEN 'violeta-africana' THEN 'Luz filtrada estable'
+		WHEN 'yucca' THEN 'Mucha luz, algo de sol directo'
+		WHEN 'zamioculca' THEN 'Luz media o baja'
+		WHEN 'aloe-vera' THEN 'Mucha luz y sol suave'
+		ELSE requerimientos_luz
+	END,
+	frecuencia_riego = CASE slug
+		WHEN 'monstera' THEN 'Cada 5-7 días en temporada cálida'
+		WHEN 'maranta' THEN '2-3 veces por semana en clima seco'
+		WHEN 'margarita' THEN '2 veces por semana'
+		WHEN 'magnolia' THEN '1-2 veces por semana'
+		WHEN 'malva' THEN '1-2 veces por semana'
+		WHEN 'menta' THEN 'Cada 2-3 días'
+		WHEN 'manzanilla' THEN '1-2 veces por semana'
+		WHEN 'madreselva' THEN '2 veces por semana en calor'
+		WHEN 'pothos' THEN 'Cada 7-10 días'
+		WHEN 'helecho-boston' THEN '2-3 veces por semana'
+		WHEN 'ficus-elastica' THEN 'Cada 7-10 días'
+		WHEN 'ficus-lyrata' THEN 'Cada 7-10 días'
+		WHEN 'cactus' THEN 'Cada 14-21 días'
+		WHEN 'sansevieria' THEN 'Cada 10-14 días'
+		WHEN 'anturio' THEN 'Cada 5-7 días'
+		WHEN 'begonia' THEN 'Cada 5-7 días'
+		WHEN 'calathea' THEN 'Cada 4-6 días'
+		WHEN 'spathiphyllum' THEN 'Cada 5-7 días'
+		WHEN 'geranio' THEN 'Cada 4-6 días en floración'
+		WHEN 'hortensia' THEN 'Cada 3-5 días'
+		WHEN 'jazmin' THEN 'Cada 4-6 días'
+		WHEN 'lavender' THEN 'Cada 10-14 días'
+		WHEN 'albahaca' THEN 'Cada 2-4 días'
+		WHEN 'orquidea' THEN 'Cada 7 días'
+		WHEN 'romero' THEN 'Cada 7-10 días'
+		WHEN 'tomillo' THEN 'Cada 7-10 días'
+		WHEN 'violeta-africana' THEN 'Cada 5-7 días por bandeja'
+		WHEN 'yucca' THEN 'Cada 10-14 días'
+		WHEN 'zamioculca' THEN 'Cada 10-15 días'
+		WHEN 'aloe-vera' THEN 'Cada 10-15 días'
+		ELSE frecuencia_riego
+	END,
+	temperatura_ideal_min = CASE slug
+		WHEN 'monstera' THEN 20.0
+		WHEN 'maranta' THEN 18.0
+		WHEN 'margarita' THEN 10.0
+		WHEN 'magnolia' THEN 12.0
+		WHEN 'malva' THEN 12.0
+		WHEN 'menta' THEN 14.0
+		WHEN 'manzanilla' THEN 12.0
+		WHEN 'madreselva' THEN 10.0
+		WHEN 'pothos' THEN 18.0
+		WHEN 'helecho-boston' THEN 16.0
+		WHEN 'ficus-elastica' THEN 18.0
+		WHEN 'ficus-lyrata' THEN 18.0
+		WHEN 'cactus' THEN 18.0
+		WHEN 'sansevieria' THEN 15.0
+		WHEN 'anturio' THEN 18.0
+		WHEN 'begonia' THEN 16.0
+		WHEN 'calathea' THEN 18.0
+		WHEN 'spathiphyllum' THEN 18.0
+		WHEN 'geranio' THEN 12.0
+		WHEN 'hortensia' THEN 12.0
+		WHEN 'jazmin' THEN 14.0
+		WHEN 'lavender' THEN 12.0
+		WHEN 'albahaca' THEN 18.0
+		WHEN 'orquidea' THEN 18.0
+		WHEN 'romero' THEN 12.0
+		WHEN 'tomillo' THEN 10.0
+		WHEN 'violeta-africana' THEN 18.0
+		WHEN 'yucca' THEN 16.0
+		WHEN 'zamioculca' THEN 18.0
+		WHEN 'aloe-vera' THEN 18.0
+		ELSE temperatura_ideal_min
+	END,
+	temperatura_ideal_max = CASE slug
+		WHEN 'monstera' THEN 28.0
+		WHEN 'maranta' THEN 27.0
+		WHEN 'margarita' THEN 24.0
+		WHEN 'magnolia' THEN 26.0
+		WHEN 'malva' THEN 25.0
+		WHEN 'menta' THEN 24.0
+		WHEN 'manzanilla' THEN 24.0
+		WHEN 'madreselva' THEN 25.0
+		WHEN 'pothos' THEN 30.0
+		WHEN 'helecho-boston' THEN 24.0
+		WHEN 'ficus-elastica' THEN 28.0
+		WHEN 'ficus-lyrata' THEN 27.0
+		WHEN 'cactus' THEN 32.0
+		WHEN 'sansevieria' THEN 30.0
+		WHEN 'anturio' THEN 28.0
+		WHEN 'begonia' THEN 26.0
+		WHEN 'calathea' THEN 27.0
+		WHEN 'spathiphyllum' THEN 27.0
+		WHEN 'geranio' THEN 26.0
+		WHEN 'hortensia' THEN 24.0
+		WHEN 'jazmin' THEN 28.0
+		WHEN 'lavender' THEN 30.0
+		WHEN 'albahaca' THEN 30.0
+		WHEN 'orquidea' THEN 28.0
+		WHEN 'romero' THEN 30.0
+		WHEN 'tomillo' THEN 30.0
+		WHEN 'violeta-africana' THEN 26.0
+		WHEN 'yucca' THEN 30.0
+		WHEN 'zamioculca' THEN 30.0
+		WHEN 'aloe-vera' THEN 30.0
+		ELSE temperatura_ideal_max
+	END,
+	toxicidad = CASE slug
+		WHEN 'monstera' THEN 'Moderada para mascotas'
+		WHEN 'maranta' THEN 'No tóxica'
+		WHEN 'margarita' THEN 'Leve'
+		WHEN 'magnolia' THEN 'Leve'
+		WHEN 'malva' THEN 'No tóxica'
+		WHEN 'menta' THEN 'Leve en exceso'
+		WHEN 'manzanilla' THEN 'Leve'
+		WHEN 'madreselva' THEN 'Moderada'
+		WHEN 'pothos' THEN 'Alta para mascotas'
+		WHEN 'helecho-boston' THEN 'No tóxica'
+		WHEN 'ficus-elastica' THEN 'Moderada para mascotas'
+		WHEN 'ficus-lyrata' THEN 'Moderada para mascotas'
+		WHEN 'cactus' THEN 'No tóxica'
+		WHEN 'sansevieria' THEN 'Moderada para mascotas'
+		WHEN 'anturio' THEN 'Alta para mascotas'
+		WHEN 'begonia' THEN 'Moderada'
+		WHEN 'calathea' THEN 'No tóxica'
+		WHEN 'spathiphyllum' THEN 'Moderada para mascotas'
+		WHEN 'geranio' THEN 'Leve a moderada'
+		WHEN 'hortensia' THEN 'Moderada'
+		WHEN 'jazmin' THEN 'Leve'
+		WHEN 'lavender' THEN 'Leve'
+		WHEN 'albahaca' THEN 'No tóxica'
+		WHEN 'orquidea' THEN 'No tóxica'
+		WHEN 'romero' THEN 'No tóxica'
+		WHEN 'tomillo' THEN 'No tóxica'
+		WHEN 'violeta-africana' THEN 'No tóxica'
+		WHEN 'yucca' THEN 'Moderada'
+		WHEN 'zamioculca' THEN 'Moderada para mascotas'
+		WHEN 'aloe-vera' THEN 'Moderada para mascotas'
+		ELSE toxicidad
 	END;

@@ -71,11 +71,21 @@ class DtoRecordsTest {
 			"Luz indirecta",
 			"Tropical",
 			"20-28 °C",
-			"60-80%"
+			"60-80%",
+			"Luz indirecta brillante",
+			"Cada 5-7 días",
+			20.0,
+			28.0,
+			"Moderada para mascotas"
 		);
 
 		assertEquals("Tropical", detail.ideal_climate());
 		assertEquals("20-28 °C", detail.ideal_temperature());
 		assertEquals("60-80%", detail.ideal_humidity());
+		assertEquals("Luz indirecta brillante", detail.requerimientos_luz());
+		assertEquals("Cada 5-7 días", detail.frecuencia_riego());
+		assertEquals(20.0, detail.temperatura_ideal_min());
+		assertEquals(28.0, detail.temperatura_ideal_max());
+		assertEquals("Moderada para mascotas", detail.toxicidad());
 	}
 }

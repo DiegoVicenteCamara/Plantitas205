@@ -9,5 +9,10 @@ CREATE TABLE plants (
     light_recommendation VARCHAR(200) NOT NULL,
     ideal_climate VARCHAR(120),
     ideal_temperature VARCHAR(120),
-    ideal_humidity VARCHAR(120)
+    ideal_humidity VARCHAR(120),
+    requerimientos_luz VARCHAR(200),
+    frecuencia_riego VARCHAR(120),
+    temperatura_ideal_min DECIMAL(4,1),
+    temperatura_ideal_max DECIMAL(4,1),
+    toxicidad VARCHAR(80)
 );

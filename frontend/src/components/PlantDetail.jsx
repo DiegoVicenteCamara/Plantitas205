@@ -86,6 +86,11 @@ export default function PlantDetail() {
 							<p><strong>Clima:</strong> {toDisplayValue(plant.ideal_climate)}</p>
 							<p><strong>Temperatura ideal:</strong> {toDisplayValue(plant.ideal_temperature)}</p>
 							<p><strong>Humedad ideal:</strong> {toDisplayValue(plant.ideal_humidity)}</p>
+							<p><strong>Luz:</strong> {toDisplayValue(plant.requerimientos_luz)}</p>
+							<p><strong>Frecuencia de riego:</strong> {toDisplayValue(plant.frecuencia_riego)}</p>
+							<p><strong>Temperatura ideal (min):</strong> {toDisplayValue(plant.temperatura_ideal_min)}</p>
+							<p><strong>Temperatura ideal (max):</strong> {toDisplayValue(plant.temperatura_ideal_max)}</p>
+							<p><strong>Toxicidad:</strong> {toDisplayValue(plant.toxicidad)}</p>
 						</aside>
 					</div>
 				)}
