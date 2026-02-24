@@ -13,6 +13,14 @@ Aplicación con backend Spring Boot y frontend React para consultar recomendacio
    - User: `sa`
    - Password: vacío
 
+### Testing y cobertura (JaCoCo)
+
+- Ejecutar tests y generar reporte de cobertura:
+   - `cd backend`
+   - `mvnw.cmd verify` (Windows)
+- Reporte HTML disponible en:
+   - `backend/target/site/jacoco/index.html`
+
 ## Frontend (React + Vite)
 
 1. En otra terminal:
