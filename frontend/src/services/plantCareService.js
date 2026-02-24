@@ -35,3 +35,16 @@ export async function fetchPlantSuggestions(prefix) {
 
 	return response.json();
 }
+
+export async function fetchPlantById(id) {
+	const response = await fetch(`${API_BASE_URL}/api/plants/${encodeURIComponent(id)}`);
+
+	if (!response.ok) {
+		if (response.status === 404) {
+			throw new Error("PLANT_NOT_FOUND");
+		}
+		throw new Error("REQUEST_FAILED");
+	}
+
+	return response.json();
+}
