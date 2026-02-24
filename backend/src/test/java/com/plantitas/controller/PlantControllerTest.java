@@ -134,7 +134,10 @@ class PlantControllerTest {
 			"Luz indirecta brillante.",
 			"Tropical húmedo",
 			"20-28 °C",
-			"60-80%"
+			"60-80%",
+			20.0,
+			28.0,
+			"Moderada para mascotas"
 		);
 		when(plantCareService.getPlantById(1L)).thenReturn(detail);
 

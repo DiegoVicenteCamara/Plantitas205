@@ -6,13 +6,6 @@ import PlantPage from "./pages/PlantPage.jsx";
 const THEME_STORAGE_KEY = "plantitas-theme";
 
 export default function App() {
-	const [isDarkMode, setIsDarkMode] = useState(() => {
-		if (typeof window === "undefined") {
-			return false;
-		}
-		const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-		const prefersDark = storedTheme === "dark";
-
 	const [isDarkMode, setIsDarkMode] = useState(
 		window.localStorage.getItem(THEME_STORAGE_KEY) === "dark"
 	);

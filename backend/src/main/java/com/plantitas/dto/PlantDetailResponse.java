@@ -11,6 +11,9 @@ public record PlantDetailResponse(
 	String light_recommendation,
 	String ideal_climate,
 	String ideal_temperature,
-	String ideal_humidity
+	String ideal_humidity,
+	Double ideal_temperature_min,
+	Double ideal_temperature_max,
+	String toxicidad
 ) {
 }

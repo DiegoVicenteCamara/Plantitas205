@@ -19,6 +19,11 @@ class PlantTest {
 		setField(plant, "indoorFriendly", true);
 		setField(plant, "wateringRecommendation", "Riego moderado");
 		setField(plant, "lightRecommendation", "Luz indirecta");
+		setField(plant, "idealClimate", "Tropical húmedo");
+		setField(plant, "idealHumidity", "60-80%");
+		setField(plant, "idealTemperatureMin", 20.0);
+		setField(plant, "idealTemperatureMax", 28.0);
+		setField(plant, "toxicidad", "Moderada para mascotas");
 
 		assertEquals(15L, plant.getId());
 		assertEquals("peace-lily", plant.getSlug());
@@ -28,6 +33,11 @@ class PlantTest {
 		assertTrue(plant.isIndoorFriendly());
 		assertEquals("Riego moderado", plant.getWateringRecommendation());
 		assertEquals("Luz indirecta", plant.getLightRecommendation());
+		assertEquals("Tropical húmedo", plant.getIdealClimate());
+		assertEquals("60-80%", plant.getIdealHumidity());
+		assertEquals(20.0, plant.getIdealTemperatureMin());
+		assertEquals(28.0, plant.getIdealTemperatureMax());
+		assertEquals("Moderada para mascotas", plant.getToxicidad());
 	}
 
 	private void setField(Object target, String fieldName, Object value) {
