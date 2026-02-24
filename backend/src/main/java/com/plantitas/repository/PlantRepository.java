@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlantRepository extends JpaRepository<Plant, Long> {
 
+	@Override
+	Optional<Plant> findById(Long id);
+
 	Optional<Plant> findBySlugIgnoreCase(String slug);
 
 	List<Plant> findTop10ByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(String prefix);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPlantCare, searchPlants } from "../services/plantCareService.js";
 import MapSelector from "../components/MapSelector.jsx";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -157,15 +157,17 @@ export default function Home() {
 				{searchResults.length > 0 && (
 					<div className="plant-list">
 						{searchResults.slice(0, 8).map((plant) => (
-							<article key={plant.id} className="plant-card">
-								{plant.image_url && (
-									<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
-								)}
-								<div>
-									<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
-									<p className="plant-meta">{plant.scientific_name}</p>
-								</div>
-							</article>
+							<Link key={plant.id} to={`/planta/${plant.id}`} className="plant-card-link">
+								<article className="plant-card">
+									{plant.image_url && (
+										<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
+									)}
+									<div>
+										<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
+										<p className="plant-meta">{plant.scientific_name}</p>
+									</div>
+								</article>
+							</Link>
 						))}
 					</div>
 				)}

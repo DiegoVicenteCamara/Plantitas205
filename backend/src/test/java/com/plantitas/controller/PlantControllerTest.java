@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.plantitas.dto.PlantCareResponse;
+import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
 import com.plantitas.service.PlantCareService;
 import java.util.List;
@@ -113,5 +114,34 @@ class PlantControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$", hasSize(2)))
 			.andExpect(jsonPath("$[0]").value("Monstera"));
+	}
+
+	@Test
+	void getPlantById_returnsPlantDetailWhenPlantExists() throws Exception {
+		PlantDetailResponse detail = new PlantDetailResponse(
+			1L,
+			"monstera",
+			"Monstera",
+			"Monstera deliciosa",
+			"img1",
+			true,
+			"Riego moderado.",
+			"Luz indirecta brillante."
+		);
+		when(plantCareService.getPlantById(1L)).thenReturn(detail);
+
+		mockMvc.perform(get("/api/plants/1"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(1))
+			.andExpect(jsonPath("$.slug").value("monstera"))
+			.andExpect(jsonPath("$.common_name").value("Monstera"));
+	}
+
+	@Test
+	void getPlantById_returnsNotFoundWhenPlantDoesNotExist() throws Exception {
+		when(plantCareService.getPlantById(999L)).thenThrow(new IllegalArgumentException("No existe una planta con ese ID."));
+
+		mockMvc.perform(get("/api/plants/999"))
+			.andExpect(status().isNotFound());
 	}
 }

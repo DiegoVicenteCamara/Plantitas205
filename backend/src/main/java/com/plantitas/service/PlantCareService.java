@@ -2,6 +2,7 @@ package com.plantitas.service;
 
 import com.plantitas.dto.PlantCareRequest;
 import com.plantitas.dto.PlantCareResponse;
+import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
 import com.plantitas.model.Plant;
 import com.plantitas.repository.PlantRepository;
@@ -73,6 +74,23 @@ public class PlantCareService {
 			.map(Plant::getCommonName)
 			.distinct()
 			.toList();
+	}
+
+	public PlantDetailResponse getPlantById(Long id) {
+		Plant plant = plantRepository
+			.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("No existe una planta con ese ID."));
+
+		return new PlantDetailResponse(
+			plant.getId(),
+			plant.getSlug(),
+			plant.getCommonName(),
+			plant.getScientificName(),
+			plant.getImageUrl(),
+			plant.isIndoorFriendly(),
+			plant.getWateringRecommendation(),
+			plant.getLightRecommendation()
+		);
 	}
 
 	private Plant resolvePlant(String plantId) {

@@ -88,6 +88,11 @@ button:disabled {
 	gap: 0.75rem;
 }
 
+.plant-card-link {
+	text-decoration: none;
+	color: inherit;
+}
+
 .plant-card {
 	display: grid;
 	grid-template-columns: 64px 1fr;
@@ -114,6 +119,13 @@ button:disabled {
 	margin: 0.2rem 0 0;
 	color: #4b5b52;
 	font-size: 0.9rem;
+}
+
+.plant-detail-image {
+	width: 100%;
+	max-width: 320px;
+	border-radius: 12px;
+	object-fit: cover;
 }
 
 .suggestions-list {
