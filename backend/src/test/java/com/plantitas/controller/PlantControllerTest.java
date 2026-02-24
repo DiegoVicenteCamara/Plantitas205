@@ -35,11 +35,15 @@ class PlantControllerTest {
 	void postPlantCare_returnsOkWhenRequestIsValid() throws Exception {
 		PlantCareResponse response = new PlantCareResponse(
 			"Monstera",
-			"40.4,-3.7",
+			"Madrid",
 			"verano",
 			"Resumen",
 			"Recomendación",
-			true
+			true,
+			23.1,
+			60,
+			667.0,
+			"full"
 		);
 		when(plantCareService.getPlantCare(any())).thenReturn(response);
 
@@ -56,7 +60,8 @@ class PlantControllerTest {
 				"""))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.plantId").value("Monstera"))
-			.andExpect(jsonPath("$.city").value("40.4,-3.7"));
+					.andExpect(jsonPath("$.city").value("Madrid"))
+					.andExpect(jsonPath("$.dataQuality").value("full"));
 	}
 
 	@Test
@@ -95,8 +100,8 @@ class PlantControllerTest {
 	@Test
 	void getPlantsSearch_returnsMappedList() throws Exception {
 		List<PlantSearchItem> items = List.of(
-			new PlantSearchItem(1L, "Aloe", "Aloe vera", "img1"),
-			new PlantSearchItem(2L, "Ficus", "Ficus elastica", "img2")
+			new PlantSearchItem(1L, "Aloe", "Aloe barbadensis", null),
+			new PlantSearchItem(2L, "Ficus", "Ficus elastica", null)
 		);
 		when(plantCareService.searchPlants("al")).thenReturn(items);
 
@@ -126,7 +131,10 @@ class PlantControllerTest {
 			"img1",
 			true,
 			"Riego moderado.",
-			"Luz indirecta brillante."
+			"Luz indirecta brillante.",
+			"Tropical húmedo",
+			"20-28 °C",
+			"60-80%"
 		);
 		when(plantCareService.getPlantById(1L)).thenReturn(detail);
 

@@ -1,5 +1,21 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
+async function resolveErrorMessage(response, fallbackMessage) {
+	try {
+		const payload = await response.json();
+		if (typeof payload?.message === "string" && payload.message.trim()) {
+			return payload.message;
+		}
+		if (typeof payload?.error === "string" && payload.error.trim()) {
+			return payload.error;
+		}
+	} catch {
+		// ignore parsing errors and use fallback message
+	}
+
+	return fallbackMessage;
+}
+
 export async function fetchPlantCare(payload) {
 	const response = await fetch(`${API_BASE_URL}/api/plant-care`, {
 		method: "POST",
@@ -10,7 +26,8 @@ export async function fetchPlantCare(payload) {
 	});
 
 	if (!response.ok) {
-		throw new Error("Request failed");
+		const message = await resolveErrorMessage(response, "No se pudo obtener la recomendación.");
+		throw new Error(message);
 	}
 
 	return response.json();
