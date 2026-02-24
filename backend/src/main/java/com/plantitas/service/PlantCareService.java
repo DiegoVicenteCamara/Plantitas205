@@ -14,18 +14,27 @@ import org.springframework.stereotype.Service;
 public class PlantCareService {
 
 	private final PlantRepository plantRepository;
+	private final WeatherClient weatherClient;
+	private final ReverseGeocodingClient reverseGeocodingClient;
 
-	public PlantCareService(PlantRepository plantRepository) {
+	public PlantCareService(
+		PlantRepository plantRepository,
+		WeatherClient weatherClient,
+		ReverseGeocodingClient reverseGeocodingClient
+	) {
 		this.plantRepository = plantRepository;
+		this.weatherClient = weatherClient;
+		this.reverseGeocodingClient = reverseGeocodingClient;
 	}
 
 	public PlantCareResponse getPlantCare(PlantCareRequest request) {
 		Plant plant = resolvePlant(request.plantId());
 		String normalizedSeason = normalizeSeason(request.season());
 		String city = resolveLocationForClimate(request);
+		WeatherData weatherData = resolveWeatherData(request);
 
 		String summary = "Para " + plant.getCommonName() + " en " + city + " durante " + normalizedSeason + ".";
-		String recommendation = buildRecommendation(plant, normalizedSeason);
+		String recommendation = buildRecommendation(plant, normalizedSeason, weatherData);
 
 		return new PlantCareResponse(
 			plant.getCommonName(),
@@ -33,13 +42,35 @@ public class PlantCareService {
 			normalizedSeason,
 			summary,
 			recommendation,
-			plant.isIndoorFriendly()
+			plant.isIndoorFriendly(),
+			weatherData.temperature(),
+			weatherData.humidity(),
+			weatherData.altitude()
 		);
+	}
+
+	private WeatherData resolveWeatherData(PlantCareRequest request) {
+		if (request.latitude() == null || request.longitude() == null) {
+			return WeatherData.empty();
+		}
+
+		try {
+			WeatherData weatherData = weatherClient.getCurrentWeather(request.latitude(), request.longitude());
+			return weatherData == null ? WeatherData.empty() : weatherData;
+		} catch (RuntimeException exception) {
+			return WeatherData.empty();
+		}
 	}
 
 	private String resolveLocationForClimate(PlantCareRequest request) {
 		if (request.latitude() != null && request.longitude() != null) {
-			return request.latitude() + "," + request.longitude();
+			String fallbackCity = normalizeText(request.city(), "Ubicación seleccionada");
+			try {
+				String resolvedCity = reverseGeocodingClient.resolveCity(request.latitude(), request.longitude());
+				return normalizeText(resolvedCity, fallbackCity);
+			} catch (RuntimeException exception) {
+				return fallbackCity;
+			}
 		}
 
 		return normalizeText(request.city(), "No indicada");
@@ -130,7 +161,7 @@ public class PlantCareService {
 		return trimmed.isEmpty() ? defaultValue : trimmed;
 	}
 
-	private String buildRecommendation(Plant plant, String season) {
+	private String buildRecommendation(Plant plant, String season, WeatherData weatherData) {
 		String seasonalTip = switch (season) {
 			case "verano" -> "En verano revisa humedad del sustrato con más frecuencia.";
 			case "otoño" -> "En otoño reduce ligeramente la frecuencia de riego.";
@@ -138,6 +169,60 @@ public class PlantCareService {
 			default -> "En primavera puedes retomar fertilización suave si aplica.";
 		};
 
+		String weatherTip = buildWeatherTip(weatherData);
+		if (!weatherTip.isBlank()) {
+			return plant.getWateringRecommendation() + " " + plant.getLightRecommendation() + " " + seasonalTip + " " + weatherTip;
+		}
+
 		return plant.getWateringRecommendation() + " " + plant.getLightRecommendation() + " " + seasonalTip;
+	}
+
+	private String buildWeatherTip(WeatherData weatherData) {
+		if (weatherData.temperature() == null && weatherData.humidity() == null && weatherData.precipitation() == null) {
+			return "";
+		}
+
+		StringBuilder tipBuilder = new StringBuilder("Según el clima actual de tu ubicación: ");
+		boolean hasSegment = false;
+
+		if (weatherData.temperature() != null) {
+			if (weatherData.temperature() >= 32) {
+				tipBuilder.append("temperatura alta, aumenta vigilancia de riego");
+				hasSegment = true;
+			} else if (weatherData.temperature() <= 8) {
+				tipBuilder.append("temperatura baja, reduce riego y evita corrientes frías");
+				hasSegment = true;
+			}
+		}
+
+		if (weatherData.humidity() != null) {
+			if (weatherData.humidity() >= 80) {
+				if (hasSegment) {
+					tipBuilder.append("; ");
+				}
+				tipBuilder.append("humedad elevada, evita encharcamientos");
+				hasSegment = true;
+			} else if (weatherData.humidity() <= 30) {
+				if (hasSegment) {
+					tipBuilder.append("; ");
+				}
+				tipBuilder.append("humedad baja, considera aumentar humedad ambiental");
+				hasSegment = true;
+			}
+		}
+
+		if (weatherData.precipitation() != null && weatherData.precipitation() > 0) {
+			if (hasSegment) {
+				tipBuilder.append("; ");
+			}
+			tipBuilder.append("hay precipitación reciente, revisa drenaje antes de añadir más agua");
+			hasSegment = true;
+		}
+
+		if (!hasSegment) {
+			return "";
+		}
+
+		return tipBuilder.append('.').toString();
 	}
 }

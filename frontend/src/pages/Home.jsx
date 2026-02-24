@@ -65,11 +65,10 @@ export default function Home() {
 		try {
 			const latitude = location.lat;
 			const longitude = location.lng;
-			const city = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
-			const response = await fetchPlantCare({ plantId, city, season, latitude, longitude });
+			const response = await fetchPlantCare({ plantId, season, latitude, longitude });
 			setResult(response);
 		} catch (err) {
-			setError("No se pudo obtener la recomendación.");
+			setError(err?.message || "No se pudo obtener la recomendación.");
 			setResult(null);
 		} finally {
 			setLoading(false);
@@ -182,6 +181,15 @@ export default function Home() {
 						<p><strong>Planta:</strong> {result.plantId}</p>
 						<p><strong>Ciudad:</strong> {result.city}</p>
 						<p><strong>Época:</strong> {result.season}</p>
+						{typeof result.temperature === "number" && (
+							<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
+						)}
+						{typeof result.humidity === "number" && (
+							<p><strong>Humedad:</strong> {result.humidity}%</p>
+						)}
+						{typeof result.altitude === "number" && (
+							<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
+						)}
 						<p><strong>Resumen:</strong> {result.summary}</p>
 						<p><strong>Recomendación:</strong> {result.recommendation}</p>
 						<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>

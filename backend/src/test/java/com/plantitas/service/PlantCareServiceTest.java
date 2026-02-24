@@ -2,8 +2,10 @@ package com.plantitas.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,26 +32,38 @@ class PlantCareServiceTest {
 	@Mock
 	private PlantRepository plantRepository;
 
+	@Mock
+	private WeatherClient weatherClient;
+
+	@Mock
+	private ReverseGeocodingClient reverseGeocodingClient;
+
 	private PlantCareService service;
 
 	@BeforeEach
 	void setUp() {
-		service = new PlantCareService(plantRepository);
+		service = new PlantCareService(plantRepository, weatherClient, reverseGeocodingClient);
 	}
 
 	@Test
 	void getPlantCare_prioritizesCoordinatesOverCity() {
 		Plant plant = createPlant(1L, "monstera", "Monstera", "Monstera deliciosa", true);
 		when(plantRepository.findById(1L)).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(40.4168, -3.7038)).thenReturn("Madrid");
+		when(weatherClient.getCurrentWeather(40.4168, -3.7038)).thenReturn(new WeatherData(24.5, 62, 667.0, 0.0, 1));
 
 		PlantCareRequest request = new PlantCareRequest("1", "Madrid", 40.4168, -3.7038, "verano");
 		PlantCareResponse response = service.getPlantCare(request);
 
 		assertEquals("Monstera", response.plantId());
-		assertEquals("40.4168,-3.7038", response.city());
+		assertEquals("Madrid", response.city());
 		assertEquals("verano", response.season());
-		assertTrue(response.summary().contains("40.4168,-3.7038"));
+		assertEquals(24.5, response.temperature());
+		assertEquals(62, response.humidity());
+		assertEquals(667.0, response.altitude());
+		assertTrue(response.summary().contains("Madrid"));
 		assertTrue(response.recommendation().contains("En verano revisa humedad del sustrato con más frecuencia."));
+		verify(reverseGeocodingClient).resolveCity(40.4168, -3.7038);
 	}
 
 	@Test
@@ -62,7 +76,46 @@ class PlantCareServiceTest {
 
 		assertEquals("Valencia", response.city());
 		assertEquals("otoño", response.season());
+		assertNull(response.temperature());
+		assertNull(response.humidity());
+		assertNull(response.altitude());
 		assertTrue(response.recommendation().contains("En otoño reduce ligeramente la frecuencia de riego."));
+		verify(plantRepository).findBySlugIgnoreCase("pothos");
+		verify(reverseGeocodingClient, never()).resolveCity(anyDouble(), anyDouble());
+		verify(weatherClient, never()).getCurrentWeather(anyDouble(), anyDouble());
+	}
+
+	@Test
+	void getPlantCare_fallsBackToGenericLocationWhenReverseGeocodingFails() {
+		Plant plant = createPlant(5L, "ficus-lyrata", "Ficus Lyrata", "Ficus lyrata", true);
+		when(plantRepository.findBySlugIgnoreCase("ficus-lyrata")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(4.6097, -74.0817)).thenThrow(new RuntimeException("timeout"));
+
+		PlantCareRequest request = new PlantCareRequest("ficus-lyrata", null, 4.6097, -74.0817, "primavera");
+		PlantCareResponse response = service.getPlantCare(request);
+
+		assertEquals("Ubicación seleccionada", response.city());
+		assertTrue(response.summary().contains("Ubicación seleccionada"));
+	}
+
+	@Test
+	void getPlantCare_changesWeatherDataAndRecommendationByCoordinates() {
+		Plant plant = createPlant(6L, "pothos", "Pothos", "Epipremnum aureum", true);
+		when(plantRepository.findBySlugIgnoreCase("pothos")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(19.4326, -99.1332)).thenReturn("Ciudad de México");
+		when(reverseGeocodingClient.resolveCity(-33.4489, -70.6693)).thenReturn("Santiago");
+		when(weatherClient.getCurrentWeather(19.4326, -99.1332)).thenReturn(new WeatherData(33.0, 25, 2240.0, 0.0, 1));
+		when(weatherClient.getCurrentWeather(-33.4489, -70.6693)).thenReturn(new WeatherData(7.0, 88, 520.0, 1.2, 61));
+
+		PlantCareResponse warmResponse = service.getPlantCare(new PlantCareRequest("pothos", null, 19.4326, -99.1332, "verano"));
+		PlantCareResponse coldResponse = service.getPlantCare(new PlantCareRequest("pothos", null, -33.4489, -70.6693, "invierno"));
+
+		assertEquals("Ciudad de México", warmResponse.city());
+		assertEquals("Santiago", coldResponse.city());
+		assertTrue(warmResponse.temperature() > coldResponse.temperature());
+		assertTrue(warmResponse.recommendation().contains("temperatura alta"));
+		assertTrue(coldResponse.recommendation().contains("temperatura baja"));
+		assertTrue(coldResponse.recommendation().contains("hay precipitación reciente"));
 	}
 
 	@Test

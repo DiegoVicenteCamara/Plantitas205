@@ -35,11 +35,14 @@ class PlantControllerTest {
 	void postPlantCare_returnsOkWhenRequestIsValid() throws Exception {
 		PlantCareResponse response = new PlantCareResponse(
 			"Monstera",
-			"40.4,-3.7",
+			"Madrid",
 			"verano",
 			"Resumen",
 			"Recomendación",
-			true
+			true,
+			23.1,
+			60,
+			667.0
 		);
 		when(plantCareService.getPlantCare(any())).thenReturn(response);
 
@@ -56,7 +59,7 @@ class PlantControllerTest {
 				"""))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.plantId").value("Monstera"))
-			.andExpect(jsonPath("$.city").value("40.4,-3.7"));
+				.andExpect(jsonPath("$.city").value("Madrid"));
 	}
 
 	@Test

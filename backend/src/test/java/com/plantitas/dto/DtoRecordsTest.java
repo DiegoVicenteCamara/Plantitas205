@@ -27,7 +27,10 @@ class DtoRecordsTest {
 			"primavera",
 			"Resumen",
 			"Recomendación",
-			false
+			false,
+			21.3,
+			55,
+			650.0
 		);
 
 		assertEquals("Monstera", response.plantId());
@@ -36,6 +39,9 @@ class DtoRecordsTest {
 		assertEquals("Resumen", response.summary());
 		assertEquals("Recomendación", response.recommendation());
 		assertFalse(response.indoorFriendly());
+		assertEquals(21.3, response.temperature());
+		assertEquals(55, response.humidity());
+		assertEquals(650.0, response.altitude());
 	}
 
 	@Test

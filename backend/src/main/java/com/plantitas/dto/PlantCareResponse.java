@@ -6,6 +6,9 @@ public record PlantCareResponse(
 	String season,
 	String summary,
 	String recommendation,
-	boolean indoorFriendly
+	boolean indoorFriendly,
+	Double temperature,
+	Integer humidity,
+	Double altitude
 ) {
 }
