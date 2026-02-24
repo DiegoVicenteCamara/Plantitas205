@@ -342,6 +342,7 @@ class PlantCareServiceTest {
 		assertEquals(1, result.size());
 		assertEquals("Aloe Vera", result.getFirst().common_name());
 		assertEquals("Aloe barbadensis", result.getFirst().scientific_name());
+		assertEquals("https://img.test/aloe.jpg", result.getFirst().image_url());
 	}
 
 	@Test
