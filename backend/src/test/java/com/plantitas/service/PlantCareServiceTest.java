@@ -334,6 +334,7 @@ class PlantCareServiceTest {
 	@Test
 	void searchPlants_mapsRepositoryEntitiesToDto() {
 		Plant plant = createPlant(7L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
+		setField(plant, "imageUrl", "https://img.test/aloe.jpg");
 		when(plantRepository.findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc("aloe"))
 			.thenReturn(List.of(plant));
 
@@ -341,6 +342,8 @@ class PlantCareServiceTest {
 
 		assertEquals(1, result.size());
 		assertEquals("Aloe Vera", result.getFirst().common_name());
+		assertEquals("Aloe barbadensis", result.getFirst().scientific_name());
+		assertEquals("https://img.test/aloe.jpg", result.getFirst().image_url());
 	}
 
 	@Test
