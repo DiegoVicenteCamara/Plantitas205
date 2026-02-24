@@ -100,8 +100,8 @@ class PlantControllerTest {
 	@Test
 	void getPlantsSearch_returnsMappedList() throws Exception {
 		List<PlantSearchItem> items = List.of(
-			new PlantSearchItem(1L, "Aloe"),
-			new PlantSearchItem(2L, "Ficus")
+			new PlantSearchItem(1L, "Aloe", "Aloe barbadensis"),
+			new PlantSearchItem(2L, "Ficus", "Ficus elastica")
 		);
 		when(plantCareService.searchPlants("al")).thenReturn(items);
 
