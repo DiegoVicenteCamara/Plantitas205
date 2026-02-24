@@ -13,12 +13,9 @@ export default function App() {
 		const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
 		const prefersDark = storedTheme === "dark";
 
-		if (prefersDark && typeof document !== "undefined") {
-			document.documentElement.classList.add("dark-theme");
-		}
-
-		return prefersDark;
-	});
+	const [isDarkMode, setIsDarkMode] = useState(
+		window.localStorage.getItem(THEME_STORAGE_KEY) === "dark"
+	);
 
 	useEffect(() => {
 		window.localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? "dark" : "light");
