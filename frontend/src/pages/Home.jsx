@@ -190,6 +190,9 @@ export default function Home() {
 						{typeof result.altitude === "number" && (
 							<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
 						)}
+						{result.dataQuality && (
+							<p><strong>Calidad de datos:</strong> {result.dataQuality}</p>
+						)}
 						<p><strong>Resumen:</strong> {result.summary}</p>
 						<p><strong>Recomendación:</strong> {result.recommendation}</p>
 						<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>

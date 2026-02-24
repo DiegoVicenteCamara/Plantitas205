@@ -1,8 +1,6 @@
 package com.plantitas.service;
 
-import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -10,26 +8,27 @@ import org.springframework.web.client.RestClient;
 public class OpenStreetMapReverseGeocodingClient implements ReverseGeocodingClient {
 
 	private final RestClient restClient;
+	private final RoundedCoordinateCache<String> cache;
 
 	public OpenStreetMapReverseGeocodingClient(
+		RestClient.Builder restClientBuilder,
 		@Value("${geocoding.api.base-url:https://nominatim.openstreetmap.org}") String geocodingBaseUrl,
-		@Value("${geocoding.api.connect-timeout-ms:2500}") int connectTimeoutMs,
-		@Value("${geocoding.api.read-timeout-ms:3500}") int readTimeoutMs
+		@Value("${geocoding.api.cache-ttl-ms:300000}") long cacheTtlMs,
+		@Value("${geocoding.api.cache-precision:3}") int cachePrecision
 	) {
-		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-		requestFactory.setConnectTimeout(Duration.ofMillis(connectTimeoutMs));
-		requestFactory.setReadTimeout(Duration.ofMillis(readTimeoutMs));
-
-		this.restClient = RestClient
-			.builder()
+		this.restClient = restClientBuilder
 			.baseUrl(geocodingBaseUrl)
 			.defaultHeader("User-Agent", "PlantitasApp/1.0")
-			.requestFactory(requestFactory)
 			.build();
+		this.cache = new RoundedCoordinateCache<>(cacheTtlMs, cachePrecision);
 	}
 
 	@Override
 	public String resolveCity(double latitude, double longitude) {
+		return cache.getOrCompute(latitude, longitude, () -> fetchCity(latitude, longitude));
+	}
+
+	private String fetchCity(double latitude, double longitude) {
 		ReverseGeocodingResponse response = restClient
 			.get()
 			.uri(uriBuilder -> uriBuilder

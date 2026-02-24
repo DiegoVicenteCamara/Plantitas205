@@ -30,7 +30,8 @@ class DtoRecordsTest {
 			false,
 			21.3,
 			55,
-			650.0
+			650.0,
+			"full"
 		);
 
 		assertEquals("Monstera", response.plantId());
@@ -42,6 +43,7 @@ class DtoRecordsTest {
 		assertEquals(21.3, response.temperature());
 		assertEquals(55, response.humidity());
 		assertEquals(650.0, response.altitude());
+		assertEquals("full", response.dataQuality());
 	}
 
 	@Test
@@ -52,5 +54,26 @@ class DtoRecordsTest {
 		assertEquals(1L, item.id());
 		assertEquals("Aloe", item.common_name());
 		assertEquals(1, response.data().size());
+	}
+
+	@Test
+	void plantDetailResponse_exposesIdealConditionFields() {
+		PlantDetailResponse detail = new PlantDetailResponse(
+			1L,
+			"monstera",
+			"Monstera",
+			"Monstera deliciosa",
+			"img1",
+			true,
+			"Riego moderado",
+			"Luz indirecta",
+			"Tropical",
+			"20-28 °C",
+			"60-80%"
+		);
+
+		assertEquals("Tropical", detail.ideal_climate());
+		assertEquals("20-28 °C", detail.ideal_temperature());
+		assertEquals("60-80%", detail.ideal_humidity());
 	}
 }

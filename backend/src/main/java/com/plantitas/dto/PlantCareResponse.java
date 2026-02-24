@@ -9,6 +9,7 @@ public record PlantCareResponse(
 	boolean indoorFriendly,
 	Double temperature,
 	Integer humidity,
-	Double altitude
+	Double altitude,
+	String dataQuality
 ) {
 }

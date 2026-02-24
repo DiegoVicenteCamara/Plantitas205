@@ -1,8 +1,6 @@
 package com.plantitas.service;
 
-import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -10,25 +8,26 @@ import org.springframework.web.client.RestClient;
 public class OpenMeteoWeatherClient implements WeatherClient {
 
 	private final RestClient restClient;
+	private final RoundedCoordinateCache<WeatherData> cache;
 
 	public OpenMeteoWeatherClient(
+		RestClient.Builder restClientBuilder,
 		@Value("${weather.api.base-url:https://api.open-meteo.com}") String weatherBaseUrl,
-		@Value("${weather.api.connect-timeout-ms:2500}") int connectTimeoutMs,
-		@Value("${weather.api.read-timeout-ms:3500}") int readTimeoutMs
+		@Value("${weather.api.cache-ttl-ms:120000}") long cacheTtlMs,
+		@Value("${weather.api.cache-precision:3}") int cachePrecision
 	) {
-		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-		requestFactory.setConnectTimeout(Duration.ofMillis(connectTimeoutMs));
-		requestFactory.setReadTimeout(Duration.ofMillis(readTimeoutMs));
-
-		this.restClient = RestClient
-			.builder()
+		this.restClient = restClientBuilder
 			.baseUrl(weatherBaseUrl)
-			.requestFactory(requestFactory)
 			.build();
+		this.cache = new RoundedCoordinateCache<>(cacheTtlMs, cachePrecision);
 	}
 
 	@Override
 	public WeatherData getCurrentWeather(double latitude, double longitude) {
+		return cache.getOrCompute(latitude, longitude, () -> fetchCurrentWeather(latitude, longitude));
+	}
+
+	private WeatherData fetchCurrentWeather(double latitude, double longitude) {
 		OpenMeteoResponse response = restClient
 			.get()
 			.uri(uriBuilder -> uriBuilder

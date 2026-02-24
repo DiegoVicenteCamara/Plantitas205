@@ -61,6 +61,7 @@ class PlantCareServiceTest {
 		assertEquals(24.5, response.temperature());
 		assertEquals(62, response.humidity());
 		assertEquals(667.0, response.altitude());
+		assertEquals("full", response.dataQuality());
 		assertTrue(response.summary().contains("Madrid"));
 		assertTrue(response.recommendation().contains("En verano revisa humedad del sustrato con más frecuencia."));
 		verify(reverseGeocodingClient).resolveCity(40.4168, -3.7038);
@@ -79,6 +80,7 @@ class PlantCareServiceTest {
 		assertNull(response.temperature());
 		assertNull(response.humidity());
 		assertNull(response.altitude());
+		assertEquals("full", response.dataQuality());
 		assertTrue(response.recommendation().contains("En otoño reduce ligeramente la frecuencia de riego."));
 		verify(plantRepository).findBySlugIgnoreCase("pothos");
 		verify(reverseGeocodingClient, never()).resolveCity(anyDouble(), anyDouble());
@@ -96,6 +98,155 @@ class PlantCareServiceTest {
 
 		assertEquals("Ubicación seleccionada", response.city());
 		assertTrue(response.summary().contains("Ubicación seleccionada"));
+		assertEquals("geocode-fallback", response.dataQuality());
+	}
+
+	@Test
+	void getPlantCare_marksWeatherFallbackWhenWeatherFails() {
+		Plant plant = createPlant(8L, "zz-plant", "ZZ Plant", "Zamioculcas zamiifolia", true);
+		when(plantRepository.findBySlugIgnoreCase("zz-plant")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(48.8566, 2.3522)).thenReturn("París");
+		when(weatherClient.getCurrentWeather(48.8566, 2.3522)).thenThrow(new RuntimeException("timeout"));
+
+		PlantCareResponse response = service.getPlantCare(new PlantCareRequest("zz-plant", null, 48.8566, 2.3522, "invierno"));
+
+		assertEquals("París", response.city());
+		assertEquals("weather-fallback", response.dataQuality());
+	}
+
+	@Test
+	void getPlantCare_handlesPartialCoordinatesWithoutCallingExternalClients() {
+		Plant plant = createPlant(9L, "snake-plant", "Snake Plant", "Dracaena trifasciata", true);
+		when(plantRepository.findBySlugIgnoreCase("snake-plant")).thenReturn(Optional.of(plant));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("snake-plant", "Lisboa", 38.7223, null, "primavera")
+		);
+
+		assertEquals("Lisboa", response.city());
+		assertEquals("full", response.dataQuality());
+		assertNull(response.temperature());
+		assertNull(response.humidity());
+		assertNull(response.altitude());
+		verify(reverseGeocodingClient, never()).resolveCity(anyDouble(), anyDouble());
+		verify(weatherClient, never()).getCurrentWeather(anyDouble(), anyDouble());
+	}
+
+	@Test
+	void getPlantCare_marksGeocodeFallbackWhenReverseGeocodingReturnsBlank() {
+		Plant plant = createPlant(13L, "anthurium", "Anthurium", "Anthurium andraeanum", true);
+		when(plantRepository.findBySlugIgnoreCase("anthurium")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(-0.1807, -78.4678)).thenReturn("   ");
+		when(weatherClient.getCurrentWeather(-0.1807, -78.4678)).thenReturn(new WeatherData(20.0, 50, 2850.0, 0.0, 1));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("anthurium", "Quito", -0.1807, -78.4678, "verano")
+		);
+
+		assertEquals("Quito", response.city());
+		assertEquals("geocode-fallback", response.dataQuality());
+	}
+
+	@Test
+	void getPlantCare_marksGeocodeFallbackWhenReverseGeocodingReturnsNull() {
+		Plant plant = createPlant(17L, "peace-lily", "Peace Lily", "Spathiphyllum", true);
+		when(plantRepository.findBySlugIgnoreCase("peace-lily")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(37.7749, -122.4194)).thenReturn(null);
+		when(weatherClient.getCurrentWeather(37.7749, -122.4194)).thenReturn(new WeatherData(18.0, 70, 16.0, 0.0, 2));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("peace-lily", "San Francisco", 37.7749, -122.4194, "primavera")
+		);
+
+		assertEquals("San Francisco", response.city());
+		assertEquals("geocode-fallback", response.dataQuality());
+	}
+
+	@Test
+	void getPlantCare_marksWeatherFallbackWhenWeatherHasNoSignals() {
+		Plant plant = createPlant(14L, "lavender", "Lavender", "Lavandula", true);
+		when(plantRepository.findBySlugIgnoreCase("lavender")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(-12.0464, -77.0428)).thenReturn("Lima");
+		when(weatherClient.getCurrentWeather(-12.0464, -77.0428))
+			.thenReturn(new WeatherData(null, null, 150.0, null, 0));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("lavender", null, -12.0464, -77.0428, "invierno")
+		);
+
+		assertEquals("Lima", response.city());
+		assertEquals("weather-fallback", response.dataQuality());
+	}
+
+	@Test
+	void getPlantCare_addsPrecipitationTipWithoutSeparatorWhenNoPreviousSegments() {
+		Plant plant = createPlant(15L, "mint", "Mint", "Mentha", true);
+		when(plantRepository.findBySlugIgnoreCase("mint")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(51.5072, -0.1276)).thenReturn("Londres");
+		when(weatherClient.getCurrentWeather(51.5072, -0.1276))
+			.thenReturn(new WeatherData(20.0, 50, 35.0, 1.8, 61));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("mint", null, 51.5072, -0.1276, "primavera")
+		);
+
+		assertTrue(response.recommendation().contains("Según el clima actual de tu ubicación: hay precipitación reciente"));
+	}
+
+	@Test
+	void getPlantCare_addsHumidityTipsWhenTemperatureIsMissing() {
+		Plant plant = createPlant(16L, "begonia", "Begonia", "Begonia rex", true);
+		when(plantRepository.findBySlugIgnoreCase("begonia")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(6.2442, -75.5812)).thenReturn("Medellín");
+		when(weatherClient.getCurrentWeather(6.2442, -75.5812))
+			.thenReturn(new WeatherData(null, 88, 1495.0, 0.0, 3));
+
+		PlantCareResponse highHumidityResponse = service.getPlantCare(
+			new PlantCareRequest("begonia", null, 6.2442, -75.5812, "otoño")
+		);
+
+		assertTrue(highHumidityResponse.recommendation().contains("humedad elevada, evita encharcamientos"));
+
+		when(weatherClient.getCurrentWeather(6.2442, -75.5812))
+			.thenReturn(new WeatherData(null, 20, 1495.0, 0.0, 3));
+
+		PlantCareResponse lowHumidityResponse = service.getPlantCare(
+			new PlantCareRequest("begonia", null, 6.2442, -75.5812, "otoño")
+		);
+
+		assertTrue(lowHumidityResponse.recommendation().contains("humedad baja, considera aumentar humedad ambiental"));
+	}
+
+	@Test
+	void getPlantCare_keepsFullQualityWhenOnlyPrecipitationExists() {
+		Plant plant = createPlant(18L, "calendula", "Caléndula", "Calendula officinalis", true);
+		when(plantRepository.findBySlugIgnoreCase("calendula")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(52.52, 13.41)).thenReturn("Berlín");
+		when(weatherClient.getCurrentWeather(52.52, 13.41))
+			.thenReturn(new WeatherData(null, null, 34.0, 2.1, 61));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("calendula", null, 52.52, 13.41, "primavera")
+		);
+
+		assertEquals("full", response.dataQuality());
+		assertTrue(response.recommendation().contains("hay precipitación reciente"));
+	}
+
+	@Test
+	void getPlantCare_omitsWeatherTipWhenHumidityAndPrecipitationAreNullAndTemperatureIsMild() {
+		Plant plant = createPlant(19L, "chive", "Cebollín", "Allium schoenoprasum", true);
+		when(plantRepository.findBySlugIgnoreCase("chive")).thenReturn(Optional.of(plant));
+		when(reverseGeocodingClient.resolveCity(41.3851, 2.1734)).thenReturn("Barcelona");
+		when(weatherClient.getCurrentWeather(41.3851, 2.1734))
+			.thenReturn(new WeatherData(20.0, null, 12.0, null, 1));
+
+		PlantCareResponse response = service.getPlantCare(
+			new PlantCareRequest("chive", null, 41.3851, 2.1734, "primavera")
+		);
+
+		assertEquals("full", response.dataQuality());
+		assertFalse(response.recommendation().contains("Según el clima actual de tu ubicación"));
 	}
 
 	@Test
@@ -116,6 +267,8 @@ class PlantCareServiceTest {
 		assertTrue(warmResponse.recommendation().contains("temperatura alta"));
 		assertTrue(coldResponse.recommendation().contains("temperatura baja"));
 		assertTrue(coldResponse.recommendation().contains("hay precipitación reciente"));
+		assertEquals("full", warmResponse.dataQuality());
+		assertEquals("full", coldResponse.dataQuality());
 	}
 
 	@Test
@@ -224,6 +377,9 @@ class PlantCareServiceTest {
 		assertEquals("Aloe barbadensis", result.scientific_name());
 		assertEquals("https://image.test/aloe.jpg", result.image_url());
 		assertTrue(result.indoor_friendly());
+		assertNull(result.ideal_climate());
+		assertNull(result.ideal_temperature());
+		assertNull(result.ideal_humidity());
 	}
 
 	@Test

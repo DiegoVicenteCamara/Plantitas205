@@ -42,7 +42,8 @@ class PlantControllerTest {
 			true,
 			23.1,
 			60,
-			667.0
+			667.0,
+			"full"
 		);
 		when(plantCareService.getPlantCare(any())).thenReturn(response);
 
@@ -59,7 +60,8 @@ class PlantControllerTest {
 				"""))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.plantId").value("Monstera"))
-				.andExpect(jsonPath("$.city").value("Madrid"));
+					.andExpect(jsonPath("$.city").value("Madrid"))
+					.andExpect(jsonPath("$.dataQuality").value("full"));
 	}
 
 	@Test
@@ -129,7 +131,10 @@ class PlantControllerTest {
 			"img1",
 			true,
 			"Riego moderado.",
-			"Luz indirecta brillante."
+			"Luz indirecta brillante.",
+			"Tropical húmedo",
+			"20-28 °C",
+			"60-80%"
 		);
 		when(plantCareService.getPlantById(1L)).thenReturn(detail);
 

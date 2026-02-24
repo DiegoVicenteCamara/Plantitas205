@@ -30,8 +30,11 @@ public class PlantCareService {
 	public PlantCareResponse getPlantCare(PlantCareRequest request) {
 		Plant plant = resolvePlant(request.plantId());
 		String normalizedSeason = normalizeSeason(request.season());
-		String city = resolveLocationForClimate(request);
-		WeatherData weatherData = resolveWeatherData(request);
+		LocationResolution locationResolution = resolveLocationForClimate(request);
+		WeatherResolution weatherResolution = resolveWeatherData(request);
+		String city = locationResolution.city();
+		WeatherData weatherData = weatherResolution.weatherData();
+		String dataQuality = determineDataQuality(locationResolution.geocodeFallback(), weatherResolution.weatherFallback());
 
 		String summary = "Para " + plant.getCommonName() + " en " + city + " durante " + normalizedSeason + ".";
 		String recommendation = buildRecommendation(plant, normalizedSeason, weatherData);
@@ -45,35 +48,55 @@ public class PlantCareService {
 			plant.isIndoorFriendly(),
 			weatherData.temperature(),
 			weatherData.humidity(),
-			weatherData.altitude()
+			weatherData.altitude(),
+			dataQuality
 		);
 	}
 
-	private WeatherData resolveWeatherData(PlantCareRequest request) {
+	private WeatherResolution resolveWeatherData(PlantCareRequest request) {
 		if (request.latitude() == null || request.longitude() == null) {
-			return WeatherData.empty();
+			return new WeatherResolution(WeatherData.empty(), false);
 		}
 
 		try {
 			WeatherData weatherData = weatherClient.getCurrentWeather(request.latitude(), request.longitude());
-			return weatherData == null ? WeatherData.empty() : weatherData;
+			if (weatherData == null) {
+				return new WeatherResolution(WeatherData.empty(), true);
+			}
+
+			boolean weatherFallback = weatherData.temperature() == null
+				&& weatherData.humidity() == null
+				&& weatherData.precipitation() == null;
+			return new WeatherResolution(weatherData, weatherFallback);
 		} catch (RuntimeException exception) {
-			return WeatherData.empty();
+			return new WeatherResolution(WeatherData.empty(), true);
 		}
 	}
 
-	private String resolveLocationForClimate(PlantCareRequest request) {
+	private LocationResolution resolveLocationForClimate(PlantCareRequest request) {
 		if (request.latitude() != null && request.longitude() != null) {
 			String fallbackCity = normalizeText(request.city(), "Ubicación seleccionada");
 			try {
 				String resolvedCity = reverseGeocodingClient.resolveCity(request.latitude(), request.longitude());
-				return normalizeText(resolvedCity, fallbackCity);
+				String normalizedCity = normalizeText(resolvedCity, fallbackCity);
+				boolean geocodeFallback = resolvedCity == null || resolvedCity.trim().isEmpty();
+				return new LocationResolution(normalizedCity, geocodeFallback);
 			} catch (RuntimeException exception) {
-				return fallbackCity;
+				return new LocationResolution(fallbackCity, true);
 			}
 		}
 
-		return normalizeText(request.city(), "No indicada");
+		return new LocationResolution(normalizeText(request.city(), "No indicada"), false);
+	}
+
+	private String determineDataQuality(boolean geocodeFallback, boolean weatherFallback) {
+		if (geocodeFallback) {
+			return "geocode-fallback";
+		}
+		if (weatherFallback) {
+			return "weather-fallback";
+		}
+		return "full";
 	}
 
 	public List<PlantSearchItem> searchPlants(String query) {
@@ -115,7 +138,10 @@ public class PlantCareService {
 			plant.getImageUrl(),
 			plant.isIndoorFriendly(),
 			plant.getWateringRecommendation(),
-			plant.getLightRecommendation()
+			plant.getLightRecommendation(),
+			plant.getIdealClimate(),
+			plant.getIdealTemperature(),
+			plant.getIdealHumidity()
 		);
 	}
 
@@ -224,5 +250,17 @@ public class PlantCareService {
 		}
 
 		return tipBuilder.append('.').toString();
+	}
+
+	private record LocationResolution(
+		String city,
+		boolean geocodeFallback
+	) {
+	}
+
+	private record WeatherResolution(
+		WeatherData weatherData,
+		boolean weatherFallback
+	) {
 	}
 }
