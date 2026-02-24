@@ -36,6 +36,15 @@ public class Plant {
 	@Column(name = "light_recommendation", nullable = false)
 	private String lightRecommendation;
 
+	@Column(name = "ideal_climate")
+	private String idealClimate;
+
+	@Column(name = "ideal_temperature")
+	private String idealTemperature;
+
+	@Column(name = "ideal_humidity")
+	private String idealHumidity;
+
 	public Long getId() {
 		return id;
 	}
@@ -66,5 +75,17 @@ public class Plant {
 
 	public String getLightRecommendation() {
 		return lightRecommendation;
+	}
+
+	public String getIdealClimate() {
+		return idealClimate;
+	}
+
+	public String getIdealTemperature() {
+		return idealTemperature;
+	}
+
+	public String getIdealHumidity() {
+		return idealHumidity;
 	}
 }

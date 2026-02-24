@@ -6,5 +6,8 @@ CREATE TABLE plants (
     image_url VARCHAR(400),
     indoor_friendly BOOLEAN NOT NULL,
     watering_recommendation VARCHAR(200) NOT NULL,
-    light_recommendation VARCHAR(200) NOT NULL
+    light_recommendation VARCHAR(200) NOT NULL,
+    ideal_climate VARCHAR(120),
+    ideal_temperature VARCHAR(120),
+    ideal_humidity VARCHAR(120)
 );

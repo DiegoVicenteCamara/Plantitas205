@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Home from "./pages/Home.jsx";
-import { Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PlantPage from "./pages/PlantPage.jsx";
 
 const THEME_STORAGE_KEY = "plantitas-theme";

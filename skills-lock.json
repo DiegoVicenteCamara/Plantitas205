@@ -6,6 +6,16 @@
       "sourceType": "github",
       "computedHash": "d0822dae53542187e04a6ea88b96c93e7b9039d5648eac5da5b7a72ab421d9b9"
     },
+    "context7": {
+      "source": "intellectronica/agent-skills",
+      "sourceType": "github",
+      "computedHash": "4e1e101b21c5be62420caffed99a5c11281ff48bfd208411b8714a14f8c82eab"
+    },
+    "enhance-prompt": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "computedHash": "28c47bcbc0e8d81f48fbbbe41d227efe4018a32c5d4674b0d052a70d215072d3"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",

@@ -8,6 +8,9 @@ public record PlantDetailResponse(
 	String image_url,
 	boolean indoor_friendly,
 	String watering_recommendation,
-	String light_recommendation
+	String light_recommendation,
+	String ideal_climate,
+	String ideal_temperature,
+	String ideal_humidity
 ) {
 }
