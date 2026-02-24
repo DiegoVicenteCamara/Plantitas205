@@ -117,9 +117,84 @@ export default function Home() {
 	};
 
 	return (
-		<main className="content">
-			<section className="card">
-				<h2>Consulta de cuidado</h2>
+		<main className="home-page">
+			<section className="home-hero card">
+				<h2>Tu jardín en contexto real</h2>
+				<p>Busca plantas, elige tu ubicación en el mapa y recibe recomendaciones claras para cada temporada.</p>
+			</section>
+
+			<div className="home-layout">
+				<section className="card home-card home-card--search">
+					<h2>Buscador de plantas</h2>
+					<p className="home-section-subtitle">Explora por nombre común o especie científica.</p>
+					<div className="form">
+						<label>
+							Nombre o especie
+							<div className="search-input-wrapper">
+								<span className="search-input-icon" aria-hidden="true">⌕</span>
+								<input
+									type="text"
+									className="search-input"
+									value={searchQuery}
+									onChange={(event) => {
+										setSearchQuery(event.target.value);
+										setShowResults(true);
+										setActiveSuggestionIndex(-1);
+									}}
+									onFocus={() => setShowResults(true)}
+									onBlur={() => {
+										setTimeout(() => setShowResults(false), 120);
+									}}
+									onKeyDown={handleSearchKeyDown}
+									placeholder="ej: fern"
+									required
+									role="combobox"
+									aria-expanded={showResults && searchResults.length > 0}
+									aria-controls="plant-search-suggestions"
+									aria-autocomplete="list"
+									aria-activedescendant={activeSuggestionIndex >= 0 ? `plant-suggestion-${searchResults[activeSuggestionIndex]?.id}` : undefined}
+								/>
+							</div>
+						</label>
+						{showResults && searchResults.length > 0 && (
+							<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
+								{searchResults.map((plant, index) => (
+									<li key={plant.id}>
+										<button
+											type="button"
+											id={`plant-suggestion-${plant.id}`}
+											className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
+											onMouseEnter={() => setActiveSuggestionIndex(index)}
+											onMouseDown={(event) => event.preventDefault()}
+											onClick={() => {
+												setShowResults(false);
+												navigate(`/planta/${plant.id}`);
+											}}
+											role="option"
+											aria-selected={activeSuggestionIndex === index}
+										>
+											{plant.common_name ?? "Sin nombre común"}
+											{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
+										</button>
+									</li>
+								))}
+							</ul>
+						)}
+						{searchLoading && <p>Buscando...</p>}
+					</div>
+
+					{searchError && <p className="error">{searchError}</p>}
+					{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
+						<p className="home-muted">No se encontraron plantas.</p>
+					)}
+					{!searchQuery.trim() && !searchLoading && !searchError && (
+						<p className="home-muted">Empieza escribiendo para descubrir plantas disponibles.</p>
+					)}
+				</section>
+
+				<section className="card home-card home-card--map">
+					<h2>Mapa y contexto climático</h2>
+					<p className="home-section-subtitle">Selecciona planta, ubicación y temporada para recibir recomendaciones.</p>
 				<form onSubmit={handleSubmit} className="form">
 					<label>
 						ID o especie de planta
@@ -145,116 +220,60 @@ export default function Home() {
 						{loading ? "Consultando..." : "Evaluar"}
 					</button>
 				</form>
-			</section>
+				</section>
 
-			<section className="card">
-				<h2>Búsqueda en catálogo local</h2>
-				<div className="form">
-					<label>
-						Nombre o especie
-						<div className="search-input-wrapper">
-							<span className="search-input-icon" aria-hidden="true">⌕</span>
-							<input
-								type="text"
-								className="search-input"
-								value={searchQuery}
-								onChange={(event) => {
-									setSearchQuery(event.target.value);
-									setShowResults(true);
-									setActiveSuggestionIndex(-1);
-								}}
-								onFocus={() => setShowResults(true)}
-								onBlur={() => {
-									setTimeout(() => setShowResults(false), 120);
-								}}
-								onKeyDown={handleSearchKeyDown}
-								placeholder="ej: fern"
-								required
-								role="combobox"
-								aria-expanded={showResults && searchResults.length > 0}
-								aria-controls="plant-search-suggestions"
-								aria-autocomplete="list"
-								aria-activedescendant={activeSuggestionIndex >= 0 ? `plant-suggestion-${searchResults[activeSuggestionIndex]?.id}` : undefined}
-							/>
-						</div>
-					</label>
-					{showResults && searchResults.length > 0 && (
-						<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
-							{searchResults.map((plant, index) => (
-								<li key={plant.id}>
-									<button
-										type="button"
-										id={`plant-suggestion-${plant.id}`}
-										className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
-										onMouseEnter={() => setActiveSuggestionIndex(index)}
-										onMouseDown={(event) => event.preventDefault()}
-										onClick={() => {
-											setShowResults(false);
-											navigate(`/planta/${plant.id}`);
-										}}
-										role="option"
-										aria-selected={activeSuggestionIndex === index}
-									>
-										{plant.common_name ?? "Sin nombre común"}
-										{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
-									</button>
-								</li>
+				<section className="card home-card home-card--plants">
+					<h2>Tarjetas de plantas</h2>
+					<p className="home-section-subtitle">Resultados visuales del buscador para navegar rápido al detalle.</p>
+					{searchResults.length > 0 ? (
+						<div className="plant-list">
+							{searchResults.slice(0, 8).map((plant) => (
+								<Link key={plant.id} to={`/planta/${plant.id}`} className="plant-card-link">
+									<article className="plant-card">
+										{plant.image_url && (
+											<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
+										)}
+										<div>
+											<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
+											<p className="plant-meta">{plant.scientific_name}</p>
+										</div>
+									</article>
+								</Link>
 							))}
-						</ul>
+						</div>
+					) : (
+						<p className="home-muted">Las tarjetas aparecerán aquí cuando realices una búsqueda.</p>
 					)}
-					{searchLoading && <p>Buscando...</p>}
-				</div>
+				</section>
 
-				{searchError && <p className="error">{searchError}</p>}
-				{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
-					<p>No se encontraron plantas.</p>
-				)}
-				{searchResults.length > 0 && (
-					<div className="plant-list">
-						{searchResults.slice(0, 8).map((plant) => (
-							<Link key={plant.id} to={`/planta/${plant.id}`} className="plant-card-link">
-								<article className="plant-card">
-									{plant.image_url && (
-										<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
-									)}
-									<div>
-										<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
-										<p className="plant-meta">{plant.scientific_name}</p>
-									</div>
-								</article>
-							</Link>
-						))}
-					</div>
-				)}
-			</section>
-
-			<section className="card">
-				<h2>Resultado</h2>
-				{error && <p className="error">{error}</p>}
-				{!result && !error && <p>Completa el formulario para obtener recomendaciones.</p>}
-				{result && (
-					<div className="result">
-						<p><strong>Planta:</strong> {result.plantId}</p>
-						<p><strong>Ciudad:</strong> {result.city}</p>
-						<p><strong>Época:</strong> {result.season}</p>
-						{typeof result.temperature === "number" && (
-							<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
-						)}
-						{typeof result.humidity === "number" && (
-							<p><strong>Humedad:</strong> {result.humidity}%</p>
-						)}
-						{typeof result.altitude === "number" && (
-							<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
-						)}
-						{result.dataQuality && (
-							<p><strong>Calidad de datos:</strong> {result.dataQuality}</p>
-						)}
-						<p><strong>Resumen:</strong> {result.summary}</p>
-						<p><strong>Recomendación:</strong> {result.recommendation}</p>
-						<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>
-					</div>
-				)}
-			</section>
+				<section className="card home-card home-card--result">
+					<h2>Resultado</h2>
+					{error && <p className="error">{error}</p>}
+					{!result && !error && <p>Completa el formulario para obtener recomendaciones.</p>}
+					{result && (
+						<div className="result">
+							<p><strong>Planta:</strong> {result.plantId}</p>
+							<p><strong>Ciudad:</strong> {result.city}</p>
+							<p><strong>Época:</strong> {result.season}</p>
+							{typeof result.temperature === "number" && (
+								<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
+							)}
+							{typeof result.humidity === "number" && (
+								<p><strong>Humedad:</strong> {result.humidity}%</p>
+							)}
+							{typeof result.altitude === "number" && (
+								<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
+							)}
+							{result.dataQuality && (
+								<p><strong>Calidad de datos:</strong> {result.dataQuality}</p>
+							)}
+							<p><strong>Resumen:</strong> {result.summary}</p>
+							<p><strong>Recomendación:</strong> {result.recommendation}</p>
+							<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>
+						</div>
+					)}
+				</section>
+			</div>
 		</main>
 	);
 }

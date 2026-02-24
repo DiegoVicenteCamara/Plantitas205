@@ -106,6 +106,15 @@ body {
 
 .app-header {
 	margin-bottom: var(--space-xl);
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--color-surface) 88%, var(--color-accent-leaf) 12%),
+		var(--color-surface)
+	);
+	border: 1px solid color-mix(in srgb, var(--color-input-border) 75%, transparent);
+	border-radius: var(--radius-lg);
+	padding: var(--space-lg);
+	box-shadow: 0 12px 28px color-mix(in srgb, var(--color-card-shadow) 65%, transparent);
 }
 
 .app-header__top {
@@ -117,6 +126,8 @@ body {
 
 .app-header h1 {
 	margin: 0 0 var(--space-sm);
+	font-size: clamp(1.8rem, 4vw, 2.4rem);
+	line-height: 1.1;
 }
 
 .app-header p {
@@ -154,6 +165,59 @@ a:focus-visible {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 	gap: var(--space-lg);
+}
+
+.home-page {
+	display: grid;
+	gap: var(--space-lg);
+}
+
+.home-hero {
+	display: grid;
+	gap: var(--space-sm);
+	border: 1px solid color-mix(in srgb, var(--color-accent-leaf) 30%, var(--color-input-border));
+	background: linear-gradient(
+		140deg,
+		color-mix(in srgb, var(--color-surface) 90%, var(--color-accent-leaf) 10%),
+		var(--color-surface)
+	);
+}
+
+.home-hero h2 {
+	margin: 0;
+	font-size: clamp(1.2rem, 3.4vw, 1.7rem);
+	line-height: 1.2;
+}
+
+.home-hero p {
+	margin: 0;
+	color: var(--color-text-muted);
+}
+
+.home-layout {
+	display: grid;
+	gap: var(--space-lg);
+}
+
+.home-card {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.home-card h2 {
+	margin: 0;
+	font-size: 1.25rem;
+	line-height: 1.2;
+}
+
+.home-section-subtitle {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: 0.95rem;
+}
+
+.home-muted {
+	color: var(--color-text-muted);
 }
 
 .card {
@@ -272,7 +336,7 @@ button:disabled {
 }
 
 .plant-list {
-	margin-top: var(--space-md);
+	margin-top: var(--space-sm);
 	display: grid;
 	gap: calc(var(--space-sm) + 0.25rem);
 }
@@ -368,6 +432,39 @@ button:disabled {
 }
 
 @media (min-width: 900px) {
+	.app-header {
+		padding: calc(var(--space-lg) + var(--space-xs));
+	}
+
+	.home-layout {
+		grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+		grid-template-areas:
+			"search map"
+			"plants map"
+			"result result";
+		align-items: start;
+	}
+
+	.home-card--search {
+		grid-area: search;
+	}
+
+	.home-card--map {
+		grid-area: map;
+	}
+
+	.home-card--plants {
+		grid-area: plants;
+	}
+
+	.home-card--result {
+		grid-area: result;
+	}
+
+	.home-card--map .map-selector__map {
+		height: 320px;
+	}
+
 	.plant-detail-layout {
 		grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
 		gap: 2rem;
