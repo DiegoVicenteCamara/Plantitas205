@@ -140,3 +140,27 @@ button:disabled {
 .suggestion-item:hover {
 	background: #f0f5f1;
 }
+
+.map-selector {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.map-selector__label {
+	margin: 0;
+	font-weight: 600;
+}
+
+.map-selector__map {
+	height: 260px;
+	width: 100%;
+	border-radius: 12px;
+	overflow: hidden;
+	border: 1px solid #d4dad5;
+}
+
+.map-selector__hint {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #4b5b52;
+}

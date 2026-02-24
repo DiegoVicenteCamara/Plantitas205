@@ -29,9 +29,19 @@ public class PlantController {
 	@PostMapping("/plant-care")
 	public PlantCareResponse getPlantCare(@RequestBody PlantCareRequest request) {
 		try {
+			validateLocationRequest(request);
 			return plantCareService.getPlantCare(request);
 		} catch (IllegalArgumentException exception) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+		}
+	}
+
+	private void validateLocationRequest(PlantCareRequest request) {
+		boolean hasLatitude = request.latitude() != null;
+		boolean hasLongitude = request.longitude() != null;
+
+		if (hasLatitude != hasLongitude) {
+			throw new IllegalArgumentException("Debes enviar latitude y longitude juntas.");
 		}
 	}
 

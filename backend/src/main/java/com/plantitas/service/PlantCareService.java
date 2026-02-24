@@ -21,7 +21,7 @@ public class PlantCareService {
 	public PlantCareResponse getPlantCare(PlantCareRequest request) {
 		Plant plant = resolvePlant(request.plantId());
 		String normalizedSeason = normalizeSeason(request.season());
-		String city = normalizeText(request.city(), "No indicada");
+		String city = resolveLocationForClimate(request);
 
 		String summary = "Para " + plant.getCommonName() + " en " + city + " durante " + normalizedSeason + ".";
 		String recommendation = buildRecommendation(plant, normalizedSeason);
@@ -34,6 +34,14 @@ public class PlantCareService {
 			recommendation,
 			plant.isIndoorFriendly()
 		);
+	}
+
+	private String resolveLocationForClimate(PlantCareRequest request) {
+		if (request.latitude() != null && request.longitude() != null) {
+			return request.latitude() + "," + request.longitude();
+		}
+
+		return normalizeText(request.city(), "No indicada");
 	}
 
 	public List<PlantSearchItem> searchPlants(String query) {

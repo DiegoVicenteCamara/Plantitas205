@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "test-master": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "1e4fedc6549e64ad6eab747c86c115840fa81d98d0c3cf582a50d66a9e9c3dd4"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "d8e7d3afe37dcc8a97b99ffb5afdb4d0919ae0092ea8b68f44eb201f035e33ac"
+    }
+  }
+}
