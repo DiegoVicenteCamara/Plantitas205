@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.plantitas.dto.PlantCareRequest;
 import com.plantitas.dto.PlantCareResponse;
+import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
 import com.plantitas.model.Plant;
 import com.plantitas.repository.PlantRepository;
@@ -157,6 +158,31 @@ class PlantCareServiceTest {
 		List<String> result = service.suggestPlantNames("spi");
 
 		assertEquals(List.of("Spider Plant"), result);
+	}
+
+	@Test
+	void getPlantById_returnsMappedDetailWhenFound() {
+		Plant plant = createPlant(12L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
+		setField(plant, "imageUrl", "https://image.test/aloe.jpg");
+		when(plantRepository.findById(12L)).thenReturn(Optional.of(plant));
+
+		PlantDetailResponse result = service.getPlantById(12L);
+
+		assertEquals(12L, result.id());
+		assertEquals("aloe-vera", result.slug());
+		assertEquals("Aloe Vera", result.common_name());
+		assertEquals("Aloe barbadensis", result.scientific_name());
+		assertEquals("https://image.test/aloe.jpg", result.image_url());
+		assertTrue(result.indoor_friendly());
+	}
+
+	@Test
+	void getPlantById_throwsWhenNotFound() {
+		when(plantRepository.findById(999L)).thenReturn(Optional.empty());
+
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.getPlantById(999L));
+
+		assertEquals("No existe una planta con ese ID.", exception.getMessage());
 	}
 
 	private Plant createPlant(Long id, String slug, String commonName, String scientificName, boolean indoorFriendly) {

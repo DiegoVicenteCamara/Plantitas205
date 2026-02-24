@@ -2,12 +2,14 @@ package com.plantitas.controller;
 
 import com.plantitas.dto.PlantCareRequest;
 import com.plantitas.dto.PlantCareResponse;
+import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchResponse;
 import com.plantitas.service.PlantCareService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,5 +55,14 @@ public class PlantController {
 	@GetMapping("/plants/suggestions")
 	public List<String> getPlantSuggestions(@RequestParam("prefix") String prefix) {
 		return plantCareService.suggestPlantNames(prefix);
+	}
+
+	@GetMapping("/plants/{id}")
+	public PlantDetailResponse getPlantById(@PathVariable Long id) {
+		try {
+			return plantCareService.getPlantById(id);
+		} catch (IllegalArgumentException exception) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+		}
 	}
 }
