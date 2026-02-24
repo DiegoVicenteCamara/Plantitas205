@@ -14,6 +14,11 @@ public interface PlantRepository extends JpaRepository<Plant, Long> {
 
 	List<Plant> findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(String name);
 
+	List<Plant> findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc(
+		String commonName,
+		String scientificName
+	);
+
 	List<Plant> findTop10ByCommonNameStartingWithIgnoreCaseOrderByCommonNameAsc(String prefix);
 
 	List<Plant> findByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCase(

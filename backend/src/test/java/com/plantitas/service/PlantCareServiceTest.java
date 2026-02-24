@@ -328,14 +328,13 @@ class PlantCareServiceTest {
 		List<PlantSearchItem> result = service.searchPlants("   ");
 
 		assertTrue(result.isEmpty());
-		verify(plantRepository, never()).findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(anyString());
+		verify(plantRepository, never()).findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc(anyString(), anyString());
 	}
 
 	@Test
 	void searchPlants_mapsRepositoryEntitiesToDto() {
 		Plant plant = createPlant(7L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
-		setField(plant, "imageUrl", "https://img.test/aloe.jpg");
-		when(plantRepository.findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc("aloe"))
+		when(plantRepository.findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc("aloe", "aloe"))
 			.thenReturn(List.of(plant));
 
 		List<PlantSearchItem> result = service.searchPlants("aloe");
