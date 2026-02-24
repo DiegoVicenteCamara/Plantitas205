@@ -26,6 +26,27 @@ Activate when a user wants to:
 - Add design system consistency to a simple idea
 - Structure a vague concept into an actionable prompt
 
+## Mandatory Prompt Sections (Always Include)
+
+Every enhanced prompt MUST include these three sections, in this exact order:
+
+1. **WHAT THE MODEL MUST DO**
+  - Clear objective
+  - Explicit functional requirements
+  - Acceptance criteria when possible
+
+2. **INFORMATION SOURCES**
+  - Where the model should get context from (files, docs, UI references, user-provided inputs)
+  - Priority order for sources (e.g., project files first, then external docs)
+  - Any constraints on assumptions when information is missing
+
+3. **WHAT THE MODEL MUST NOT DO**
+  - Explicit non-goals and forbidden changes
+  - Scope boundaries (no extra features, no unrelated refactors)
+  - UX/design constraints to preserve existing behavior unless requested
+
+If any of these sections is missing, the prompt is considered incomplete.
+
 ## Enhancement Pipeline
 
 Follow these steps to enhance any prompt:
@@ -120,6 +141,22 @@ Structure the enhanced prompt in this order:
 ```markdown
 [One-line description of the page purpose and vibe]
 
+**WHAT THE MODEL MUST DO:**
+- [Primary objective]
+- [Required changes]
+- [Acceptance criteria]
+
+**INFORMATION SOURCES:**
+- [Source 1: project files/components]
+- [Source 2: user references (images/text)]
+- [Source 3: official docs if needed]
+- [Fallback rule for missing data]
+
+**WHAT THE MODEL MUST NOT DO:**
+- [Non-goals]
+- [Out-of-scope edits]
+- [Design or architecture constraints]
+
 **DESIGN SYSTEM (REQUIRED):**
 - Platform: [Web/Mobile], [Desktop/Mobile]-first
 - Theme: [Light/Dark], [style descriptors]
@@ -153,6 +190,21 @@ Structure the enhanced prompt in this order:
 ```markdown
 A clean, trustworthy login page with a centered form and subtle branding.
 
+**WHAT THE MODEL MUST DO:**
+- Build a login page with a centered authentication card.
+- Include email and password fields, a "Forgot password?" link, and a primary "Sign In" button.
+- Add a secondary "Sign up" path for users without an account.
+
+**INFORMATION SOURCES:**
+- Use existing project styles/components first.
+- Use the project's DESIGN.md if available.
+- Use Stitch prompting guidelines only to resolve unclear UI phrasing.
+
+**WHAT THE MODEL MUST NOT DO:**
+- Do not add social login providers unless explicitly requested.
+- Do not change global navigation or route structure.
+- Do not introduce extra pages or onboarding flows.
+
 **DESIGN SYSTEM (REQUIRED):**
 - Platform: Web, Desktop-first
 - Theme: Light, minimal, professional
@@ -183,6 +235,20 @@ file using the `design-md` skill.
 **Enhanced output:**
 ```markdown
 Add a search bar to the header navigation.
+
+**WHAT THE MODEL MUST DO:**
+- Insert a search input in the header, right side before the user avatar.
+- Keep the change targeted and consistent with the current design language.
+
+**INFORMATION SOURCES:**
+- Use the current header component structure as the primary source.
+- Follow existing spacing, border radius, and typography tokens from the project.
+- Use user instructions as the final authority for placement.
+
+**WHAT THE MODEL MUST NOT DO:**
+- Do not modify unrelated header items or navigation behavior.
+- Do not change routing, authentication, or backend logic.
+- Do not add animations beyond the requested focus behavior.
 
 **Specific changes:**
 - Location: Header, right side before user avatar
