@@ -135,8 +135,6 @@ class PlantControllerTest {
 			"Tropical húmedo",
 			"20-28 °C",
 			"60-80%",
-			"Luz indirecta brillante",
-			"Cada 5-7 días",
 			20.0,
 			28.0,
 			"Moderada para mascotas"

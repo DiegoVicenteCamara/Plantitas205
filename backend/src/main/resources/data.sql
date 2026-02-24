@@ -66,39 +66,6 @@ SET
 		WHEN 'aloe-vera' THEN 'Árido-semiárido'
 		ELSE ideal_climate
 	END,
-	ideal_temperature = CASE slug
-		WHEN 'monstera' THEN '20-28 °C'
-		WHEN 'maranta' THEN '18-27 °C'
-		WHEN 'margarita' THEN '10-24 °C'
-		WHEN 'magnolia' THEN '12-26 °C'
-		WHEN 'malva' THEN '12-25 °C'
-		WHEN 'menta' THEN '14-24 °C'
-		WHEN 'manzanilla' THEN '12-24 °C'
-		WHEN 'madreselva' THEN '10-25 °C'
-		WHEN 'pothos' THEN '18-30 °C'
-		WHEN 'helecho-boston' THEN '16-24 °C'
-		WHEN 'ficus-elastica' THEN '18-28 °C'
-		WHEN 'ficus-lyrata' THEN '18-27 °C'
-		WHEN 'cactus' THEN '18-32 °C'
-		WHEN 'sansevieria' THEN '15-30 °C'
-		WHEN 'anturio' THEN '18-28 °C'
-		WHEN 'begonia' THEN '16-26 °C'
-		WHEN 'calathea' THEN '18-27 °C'
-		WHEN 'spathiphyllum' THEN '18-27 °C'
-		WHEN 'geranio' THEN '12-26 °C'
-		WHEN 'hortensia' THEN '12-24 °C'
-		WHEN 'jazmin' THEN '14-28 °C'
-		WHEN 'lavender' THEN '12-30 °C'
-		WHEN 'albahaca' THEN '18-30 °C'
-		WHEN 'orquidea' THEN '18-28 °C'
-		WHEN 'romero' THEN '12-30 °C'
-		WHEN 'tomillo' THEN '10-30 °C'
-		WHEN 'violeta-africana' THEN '18-26 °C'
-		WHEN 'yucca' THEN '16-30 °C'
-		WHEN 'zamioculca' THEN '18-30 °C'
-		WHEN 'aloe-vera' THEN '18-30 °C'
-		ELSE ideal_temperature
-	END,
 	ideal_humidity = CASE slug
 		WHEN 'monstera' THEN '60-80%'
 		WHEN 'maranta' THEN '60-80%'
@@ -132,73 +99,7 @@ SET
 		WHEN 'aloe-vera' THEN '25-45%'
 		ELSE ideal_humidity
 	END,
-	requerimientos_luz = CASE slug
-		WHEN 'monstera' THEN 'Luz indirecta brillante'
-		WHEN 'maranta' THEN 'Luz media indirecta'
-		WHEN 'margarita' THEN 'Sol directo o semisombra luminosa'
-		WHEN 'magnolia' THEN 'Sol suave con buena ventilación'
-		WHEN 'malva' THEN 'Pleno sol'
-		WHEN 'menta' THEN 'Luz abundante sin sol extremo continuo'
-		WHEN 'manzanilla' THEN 'Sol directo'
-		WHEN 'madreselva' THEN 'Sol o semisombra'
-		WHEN 'pothos' THEN 'Sombra parcial a luz indirecta'
-		WHEN 'helecho-boston' THEN 'Luz indirecta y ambiente fresco'
-		WHEN 'ficus-elastica' THEN 'Luz brillante filtrada'
-		WHEN 'ficus-lyrata' THEN 'Luz intensa indirecta'
-		WHEN 'cactus' THEN 'Sol directo varias horas'
-		WHEN 'sansevieria' THEN 'Tolera baja luz, prefiere luz media'
-		WHEN 'anturio' THEN 'Luz indirecta brillante'
-		WHEN 'begonia' THEN 'Luz indirecta abundante'
-		WHEN 'calathea' THEN 'Luz media sin sol directo'
-		WHEN 'spathiphyllum' THEN 'Luz media a baja'
-		WHEN 'geranio' THEN 'Sol directo'
-		WHEN 'hortensia' THEN 'Semisombra luminosa'
-		WHEN 'jazmin' THEN 'Sol parcial o completo'
-		WHEN 'lavender' THEN 'Sol directo varias horas'
-		WHEN 'albahaca' THEN 'Sol suave o luz intensa indirecta'
-		WHEN 'orquidea' THEN 'Luz brillante sin sol directo'
-		WHEN 'romero' THEN 'Pleno sol'
-		WHEN 'tomillo' THEN 'Pleno sol'
-		WHEN 'violeta-africana' THEN 'Luz filtrada estable'
-		WHEN 'yucca' THEN 'Mucha luz, algo de sol directo'
-		WHEN 'zamioculca' THEN 'Luz media o baja'
-		WHEN 'aloe-vera' THEN 'Mucha luz y sol suave'
-		ELSE requerimientos_luz
-	END,
-	frecuencia_riego = CASE slug
-		WHEN 'monstera' THEN 'Cada 5-7 días en temporada cálida'
-		WHEN 'maranta' THEN '2-3 veces por semana en clima seco'
-		WHEN 'margarita' THEN '2 veces por semana'
-		WHEN 'magnolia' THEN '1-2 veces por semana'
-		WHEN 'malva' THEN '1-2 veces por semana'
-		WHEN 'menta' THEN 'Cada 2-3 días'
-		WHEN 'manzanilla' THEN '1-2 veces por semana'
-		WHEN 'madreselva' THEN '2 veces por semana en calor'
-		WHEN 'pothos' THEN 'Cada 7-10 días'
-		WHEN 'helecho-boston' THEN '2-3 veces por semana'
-		WHEN 'ficus-elastica' THEN 'Cada 7-10 días'
-		WHEN 'ficus-lyrata' THEN 'Cada 7-10 días'
-		WHEN 'cactus' THEN 'Cada 14-21 días'
-		WHEN 'sansevieria' THEN 'Cada 10-14 días'
-		WHEN 'anturio' THEN 'Cada 5-7 días'
-		WHEN 'begonia' THEN 'Cada 5-7 días'
-		WHEN 'calathea' THEN 'Cada 4-6 días'
-		WHEN 'spathiphyllum' THEN 'Cada 5-7 días'
-		WHEN 'geranio' THEN 'Cada 4-6 días en floración'
-		WHEN 'hortensia' THEN 'Cada 3-5 días'
-		WHEN 'jazmin' THEN 'Cada 4-6 días'
-		WHEN 'lavender' THEN 'Cada 10-14 días'
-		WHEN 'albahaca' THEN 'Cada 2-4 días'
-		WHEN 'orquidea' THEN 'Cada 7 días'
-		WHEN 'romero' THEN 'Cada 7-10 días'
-		WHEN 'tomillo' THEN 'Cada 7-10 días'
-		WHEN 'violeta-africana' THEN 'Cada 5-7 días por bandeja'
-		WHEN 'yucca' THEN 'Cada 10-14 días'
-		WHEN 'zamioculca' THEN 'Cada 10-15 días'
-		WHEN 'aloe-vera' THEN 'Cada 10-15 días'
-		ELSE frecuencia_riego
-	END,
-	temperatura_ideal_min = CASE slug
+	ideal_temperature_min = CASE slug
 		WHEN 'monstera' THEN 20.0
 		WHEN 'maranta' THEN 18.0
 		WHEN 'margarita' THEN 10.0
@@ -229,9 +130,9 @@ SET
 		WHEN 'yucca' THEN 16.0
 		WHEN 'zamioculca' THEN 18.0
 		WHEN 'aloe-vera' THEN 18.0
-		ELSE temperatura_ideal_min
+		ELSE ideal_temperature_min
 	END,
-	temperatura_ideal_max = CASE slug
+	ideal_temperature_max = CASE slug
 		WHEN 'monstera' THEN 28.0
 		WHEN 'maranta' THEN 27.0
 		WHEN 'margarita' THEN 24.0
@@ -262,7 +163,7 @@ SET
 		WHEN 'yucca' THEN 30.0
 		WHEN 'zamioculca' THEN 30.0
 		WHEN 'aloe-vera' THEN 30.0
-		ELSE temperatura_ideal_max
+		ELSE ideal_temperature_max
 	END,
 	toxicidad = CASE slug
 		WHEN 'monstera' THEN 'Moderada para mascotas'

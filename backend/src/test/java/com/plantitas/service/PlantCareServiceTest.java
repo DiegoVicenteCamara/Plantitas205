@@ -370,6 +370,8 @@ class PlantCareServiceTest {
 	void getPlantById_returnsMappedDetailWhenFound() {
 		Plant plant = createPlant(12L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
 		setField(plant, "imageUrl", "https://image.test/aloe.jpg");
+		setField(plant, "idealTemperatureMin", 20.0);
+		setField(plant, "idealTemperatureMax", 28.0);
 		when(plantRepository.findById(12L)).thenReturn(Optional.of(plant));
 
 		PlantDetailResponse result = service.getPlantById(12L);
@@ -381,12 +383,10 @@ class PlantCareServiceTest {
 		assertEquals("https://image.test/aloe.jpg", result.image_url());
 		assertTrue(result.indoor_friendly());
 		assertNull(result.ideal_climate());
-		assertNull(result.ideal_temperature());
+		assertEquals("20-28 °C", result.ideal_temperature());
 		assertNull(result.ideal_humidity());
-		assertNull(result.requerimientos_luz());
-		assertNull(result.frecuencia_riego());
-		assertNull(result.temperatura_ideal_min());
-		assertNull(result.temperatura_ideal_max());
+		assertEquals(20.0, result.ideal_temperature_min());
+		assertEquals(28.0, result.ideal_temperature_max());
 		assertNull(result.toxicidad());
 	}
 

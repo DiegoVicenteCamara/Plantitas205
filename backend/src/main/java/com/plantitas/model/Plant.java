@@ -39,23 +39,14 @@ public class Plant {
 	@Column(name = "ideal_climate")
 	private String idealClimate;
 
-	@Column(name = "ideal_temperature")
-	private String idealTemperature;
-
 	@Column(name = "ideal_humidity")
 	private String idealHumidity;
 
-	@Column(name = "requerimientos_luz")
-	private String requerimientosLuz;
+	@Column(name = "ideal_temperature_min")
+	private Double idealTemperatureMin;
 
-	@Column(name = "frecuencia_riego")
-	private String frecuenciaRiego;
-
-	@Column(name = "temperatura_ideal_min")
-	private Double temperaturaIdealMin;
-
-	@Column(name = "temperatura_ideal_max")
-	private Double temperaturaIdealMax;
+	@Column(name = "ideal_temperature_max")
+	private Double idealTemperatureMax;
 
 	@Column(name = "toxicidad")
 	private String toxicidad;
@@ -96,28 +87,16 @@ public class Plant {
 		return idealClimate;
 	}
 
-	public String getIdealTemperature() {
-		return idealTemperature;
-	}
-
 	public String getIdealHumidity() {
 		return idealHumidity;
 	}
 
-	public String getRequerimientosLuz() {
-		return requerimientosLuz;
+	public Double getIdealTemperatureMin() {
+		return idealTemperatureMin;
 	}
 
-	public String getFrecuenciaRiego() {
-		return frecuenciaRiego;
-	}
-
-	public Double getTemperaturaIdealMin() {
-		return temperaturaIdealMin;
-	}
-
-	public Double getTemperaturaIdealMax() {
-		return temperaturaIdealMax;
+	public Double getIdealTemperatureMax() {
+		return idealTemperatureMax;
 	}
 
 	public String getToxicidad() {

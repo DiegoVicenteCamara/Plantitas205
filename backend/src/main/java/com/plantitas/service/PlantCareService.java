@@ -130,6 +130,11 @@ public class PlantCareService {
 			.findById(id)
 			.orElseThrow(() -> new IllegalArgumentException("No existe una planta con ese ID."));
 
+		String idealTemperature = formatIdealTemperatureRange(
+			plant.getIdealTemperatureMin(),
+			plant.getIdealTemperatureMax()
+		);
+
 		return new PlantDetailResponse(
 			plant.getId(),
 			plant.getSlug(),
@@ -140,14 +145,33 @@ public class PlantCareService {
 			plant.getWateringRecommendation(),
 			plant.getLightRecommendation(),
 			plant.getIdealClimate(),
-			plant.getIdealTemperature(),
+			idealTemperature,
 			plant.getIdealHumidity(),
-			plant.getRequerimientosLuz(),
-			plant.getFrecuenciaRiego(),
-			plant.getTemperaturaIdealMin(),
-			plant.getTemperaturaIdealMax(),
+			plant.getIdealTemperatureMin(),
+			plant.getIdealTemperatureMax(),
 			plant.getToxicidad()
 		);
+	}
+
+	private String formatIdealTemperatureRange(Double min, Double max) {
+		if (min == null && max == null) {
+			return null;
+		}
+		if (min != null && max != null) {
+			return "%s-%s °C".formatted(formatTemperatureValue(min), formatTemperatureValue(max));
+		}
+		if (min != null) {
+			return "Desde %s °C".formatted(formatTemperatureValue(min));
+		}
+		return "Hasta %s °C".formatted(formatTemperatureValue(max));
+	}
+
+	private String formatTemperatureValue(Double value) {
+		double rounded = Math.rint(value);
+		if (Double.compare(value, rounded) == 0) {
+			return Long.toString(Math.round(rounded));
+		}
+		return String.format(Locale.ROOT, "%.1f", value);
 	}
 
 	private Plant resolvePlant(String plantId) {
