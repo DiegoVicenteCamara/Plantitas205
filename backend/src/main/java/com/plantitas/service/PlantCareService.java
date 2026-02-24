@@ -108,7 +108,7 @@ public class PlantCareService {
 		return plantRepository
 			.findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(normalizedQuery)
 			.stream()
-			.map(plant -> new PlantSearchItem(plant.getId(), plant.getCommonName()))
+			.map(plant -> new PlantSearchItem(plant.getId(), plant.getCommonName(), plant.getScientificName()))
 			.toList();
 	}
 
