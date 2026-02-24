@@ -52,14 +52,9 @@ public class PlantCareService {
 		}
 
 		return plantRepository
-			.findByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCase(normalizedQuery, normalizedQuery)
+			.findTop10ByCommonNameContainingIgnoreCaseOrderByCommonNameAsc(normalizedQuery)
 			.stream()
-			.map(plant -> new PlantSearchItem(
-				plant.getId(),
-				plant.getCommonName(),
-				plant.getScientificName(),
-				plant.getImageUrl()
-			))
+			.map(plant -> new PlantSearchItem(plant.getId(), plant.getCommonName()))
 			.toList();
 	}
 

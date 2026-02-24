@@ -40,13 +40,11 @@ class DtoRecordsTest {
 
 	@Test
 	void plantSearchDtos_exposeAllFields() {
-		PlantSearchItem item = new PlantSearchItem(1L, "Aloe", "Aloe vera", "image-url");
+		PlantSearchItem item = new PlantSearchItem(1L, "Aloe");
 		PlantSearchResponse response = new PlantSearchResponse(List.of(item));
 
 		assertEquals(1L, item.id());
 		assertEquals("Aloe", item.common_name());
-		assertEquals("Aloe vera", item.scientific_name());
-		assertEquals("image-url", item.image_url());
 		assertEquals(1, response.data().size());
 	}
 }
