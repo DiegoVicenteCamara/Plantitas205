@@ -36,6 +36,7 @@ export default function App() {
 								type="button"
 								className="theme-toggle"
 								onClick={() => setIsDarkMode((previousValue) => !previousValue)}
+								aria-label="Cambiar tema"
 							>
 								{isDarkMode ? "Modo claro" : "Modo oscuro"}
 							</button>
