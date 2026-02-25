@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPlantCare, searchPlants } from "../services/plantCareService.js";
 import MapSelector from "../components/MapSelector.jsx";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -121,15 +121,10 @@ export default function Home() {
 			<section className="home-hero card">
 				<h2>Tu jardín en contexto real</h2>
 				<p>Busca plantas, elige tu ubicación en el mapa y recibe recomendaciones claras para cada temporada.</p>
-			</section>
-
-			<div className="home-layout">
-				<section className="card home-card home-card--search">
-					<h2>Buscador de plantas</h2>
-					<p className="home-section-subtitle">Explora por nombre común o especie científica.</p>
-					<div className="form">
-						<label>
-							Nombre o especie
+				<div className="home-hero-search">
+					<label>
+						Buscar planta
+						<div className="search-combobox">
 							<div className="search-input-wrapper">
 								<span className="search-input-icon" aria-hidden="true">⌕</span>
 								<input
@@ -155,34 +150,33 @@ export default function Home() {
 									aria-activedescendant={activeSuggestionIndex >= 0 ? `plant-suggestion-${searchResults[activeSuggestionIndex]?.id}` : undefined}
 								/>
 							</div>
-						</label>
-						{showResults && searchResults.length > 0 && (
-							<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
-								{searchResults.map((plant, index) => (
-									<li key={plant.id}>
-										<button
-											type="button"
-											id={`plant-suggestion-${plant.id}`}
-											className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
-											onMouseEnter={() => setActiveSuggestionIndex(index)}
-											onMouseDown={(event) => event.preventDefault()}
-											onClick={() => {
-												setShowResults(false);
-												navigate(`/planta/${plant.id}`);
-											}}
-											role="option"
-											aria-selected={activeSuggestionIndex === index}
-										>
-											{plant.common_name ?? "Sin nombre común"}
-											{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
-										</button>
-									</li>
-								))}
-							</ul>
-						)}
-						{searchLoading && <p>Buscando...</p>}
-					</div>
-
+							{showResults && searchResults.length > 0 && (
+								<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
+									{searchResults.map((plant, index) => (
+										<li key={plant.id}>
+											<button
+												type="button"
+												id={`plant-suggestion-${plant.id}`}
+												className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
+												onMouseEnter={() => setActiveSuggestionIndex(index)}
+												onMouseDown={(event) => event.preventDefault()}
+												onClick={() => {
+													setShowResults(false);
+													navigate(`/planta/${plant.id}`);
+												}}
+												role="option"
+												aria-selected={activeSuggestionIndex === index}
+											>
+												{plant.common_name ?? "Sin nombre común"}
+												{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
+											</button>
+										</li>
+									))}
+								</ul>
+							)}
+						</div>
+					</label>
+					{searchLoading && <p className="home-muted">Buscando...</p>}
 					{searchError && <p className="error">{searchError}</p>}
 					{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
 						<p className="home-muted">No se encontraron plantas.</p>
@@ -190,88 +184,72 @@ export default function Home() {
 					{!searchQuery.trim() && !searchLoading && !searchError && (
 						<p className="home-muted">Empieza escribiendo para descubrir plantas disponibles.</p>
 					)}
-				</section>
+				</div>
+			</section>
 
-				<section className="card home-card home-card--map">
-					<h2>Mapa y contexto climático</h2>
-					<p className="home-section-subtitle">Selecciona planta, ubicación y temporada para recibir recomendaciones.</p>
-				<form onSubmit={handleSubmit} className="form">
-					<label>
-						ID o especie de planta
-						<input
-							type="text"
-							value={plantId}
-							onChange={(event) => setPlantId(event.target.value)}
-							placeholder="ej: monstera"
-							required
-						/>
-					</label>
-					<MapSelector value={location} onChange={setLocation} />
-					<label>
-						Época del año
-						<select value={season} onChange={(event) => setSeason(event.target.value)}>
-							<option value="primavera">Primavera</option>
-							<option value="verano">Verano</option>
-							<option value="otono">Otoño</option>
-							<option value="invierno">Invierno</option>
-						</select>
-					</label>
-					<button type="submit" className="btn btn--primary" disabled={loading || !location}>
-						{loading ? "Consultando..." : "Evaluar"}
-					</button>
-				</form>
-				</section>
+			<div className="home-layout">
+				<section className="card home-card home-card--context">
+					<h2>Contexto y resultado</h2>
+					<p className="home-section-subtitle">Configura ubicación y temporada, y revisa el resultado en el mismo bloque.</p>
 
-				<section className="card home-card home-card--plants">
-					<h2>Tarjetas de plantas</h2>
-					<p className="home-section-subtitle">Resultados visuales del buscador para navegar rápido al detalle.</p>
-					{searchResults.length > 0 ? (
-						<div className="plant-list">
-							{searchResults.slice(0, 8).map((plant) => (
-								<Link key={plant.id} to={`/planta/${plant.id}`} className="plant-card-link">
-									<article className="plant-card">
-										{plant.image_url && (
-											<img src={plant.image_url} alt={plant.common_name ?? plant.scientific_name} />
-										)}
-										<div>
-											<p className="plant-title">{plant.common_name ?? "Sin nombre común"}</p>
-											<p className="plant-meta">{plant.scientific_name}</p>
-										</div>
-									</article>
-								</Link>
-							))}
-						</div>
-					) : (
-						<p className="home-muted">Las tarjetas aparecerán aquí cuando realices una búsqueda.</p>
-					)}
-				</section>
+					<div className="home-context-grid">
+						<section className="home-context-block home-context-block--map" aria-label="Mapa y contexto climático">
+							<h3>Mapa y contexto climático</h3>
+							<form onSubmit={handleSubmit} className="form">
+								<label>
+									ID o especie de planta
+									<input
+										type="text"
+										value={plantId}
+										onChange={(event) => setPlantId(event.target.value)}
+										placeholder="ej: monstera"
+										required
+									/>
+								</label>
+								<MapSelector value={location} onChange={setLocation} />
+								<label>
+									Época del año
+									<select value={season} onChange={(event) => setSeason(event.target.value)}>
+										<option value="primavera">Primavera</option>
+										<option value="verano">Verano</option>
+										<option value="otono">Otoño</option>
+										<option value="invierno">Invierno</option>
+									</select>
+								</label>
+								<button type="submit" className="btn btn--primary" disabled={loading || !location}>
+									{loading ? "Consultando..." : "Evaluar"}
+								</button>
+							</form>
+						</section>
 
-				<section className="card home-card home-card--result">
-					<h2>Resultado</h2>
-					{error && <p className="error">{error}</p>}
-					{!result && !error && <p>Completa el formulario para obtener recomendaciones.</p>}
-					{result && (
-						<div className="result">
-							<p><strong>Planta:</strong> {result.plantId}</p>
-							<p><strong>Ciudad:</strong> {result.city}</p>
-							<p><strong>Época:</strong> {result.season}</p>
-							{typeof result.temperature === "number" && (
-								<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
+						<section className="home-context-block home-context-block--result" aria-label="Resultado de recomendaciones">
+							<h3>Resultado</h3>
+							{error && <p className="error">{error}</p>}
+							{!result && !error && <p>Completa el formulario para obtener recomendaciones.</p>}
+							{result && (
+								<div className="result">
+									<p><strong>Planta:</strong> {result.plantId}</p>
+									<p><strong>Ciudad:</strong> {result.city}</p>
+									<p><strong>Época:</strong> {result.season}</p>
+									{typeof result.temperature === "number" && (
+										<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
+									)}
+									{typeof result.humidity === "number" && (
+										<p><strong>Humedad:</strong> {result.humidity}%</p>
+									)}
+									{typeof result.altitude === "number" && (
+										<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
+									)}
+									{result.dataQuality && (
+										<p><strong>Calidad de datos:</strong> {result.dataQuality}</p>
+									)}
+									<p><strong>Resumen:</strong> {result.summary}</p>
+									<p><strong>Recomendación:</strong> {result.recommendation}</p>
+									<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>
+								</div>
 							)}
-							{typeof result.humidity === "number" && (
-								<p><strong>Humedad:</strong> {result.humidity}%</p>
-							)}
-							{typeof result.altitude === "number" && (
-								<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
-							)}
-							{result.dataQuality && (
-								<p><strong>Calidad de datos:</strong> {result.dataQuality}</p>
-							)}
-							<p><strong>Resumen:</strong> {result.summary}</p>
-							<p><strong>Recomendación:</strong> {result.recommendation}</p>
-							<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>
-						</div>
-					)}
+						</section>
+					</div>
 				</section>
 			</div>
 		</main>
