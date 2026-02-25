@@ -42,11 +42,8 @@ public class Plant {
 	@Column(name = "ideal_humidity")
 	private String idealHumidity;
 
-	@Column(name = "ideal_temperature_min")
-	private Double idealTemperatureMin;
-
-	@Column(name = "ideal_temperature_max")
-	private Double idealTemperatureMax;
+	@Column(name = "ideal_temperature")
+	private String idealTemperature;
 
 	@Column(name = "toxicidad")
 	private String toxicidad;
@@ -91,12 +88,8 @@ public class Plant {
 		return idealHumidity;
 	}
 
-	public Double getIdealTemperatureMin() {
-		return idealTemperatureMin;
-	}
-
-	public Double getIdealTemperatureMax() {
-		return idealTemperatureMax;
+	public String getIdealTemperature() {
+		return idealTemperature;
 	}
 
 	public String getToxicidad() {

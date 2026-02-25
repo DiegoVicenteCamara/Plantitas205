@@ -27,7 +27,7 @@ export default function App() {
 							<h1>Plantitas</h1>
 							<button
 								type="button"
-								className="theme-toggle"
+								className="theme-toggle btn btn--secondary"
 								onClick={() => setIsDarkMode((previousValue) => !previousValue)}
 								aria-label="Cambiar tema"
 							>

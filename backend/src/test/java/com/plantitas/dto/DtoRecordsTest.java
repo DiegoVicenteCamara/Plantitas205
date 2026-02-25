@@ -72,16 +72,12 @@ class DtoRecordsTest {
 			"Tropical",
 			"20-28 °C",
 			"60-80%",
-			20.0,
-			28.0,
 			"Moderada para mascotas"
 		);
 
 		assertEquals("Tropical", detail.ideal_climate());
 		assertEquals("20-28 °C", detail.ideal_temperature());
 		assertEquals("60-80%", detail.ideal_humidity());
-		assertEquals(20.0, detail.ideal_temperature_min());
-		assertEquals(28.0, detail.ideal_temperature_max());
 		assertEquals("Moderada para mascotas", detail.toxicidad());
 	}
 }

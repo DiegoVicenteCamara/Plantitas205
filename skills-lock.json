@@ -11,6 +11,11 @@
       "sourceType": "github",
       "computedHash": "4e1e101b21c5be62420caffed99a5c11281ff48bfd208411b8714a14f8c82eab"
     },
+    "css-styling-expert": {
+      "source": "cin12211/orca-q",
+      "sourceType": "github",
+      "computedHash": "28ff7750cba870d447e3a99d1b7e4cd653f2d57448fa69c40eab628cbfebd3e7"
+    },
     "enhance-prompt": {
       "source": "google-labs-code/stitch-skills",
       "sourceType": "github",
@@ -20,6 +25,16 @@
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "computedHash": "25872a21881a950edc3db1f3329664d60405d539660ce05b3265db2de06a7dfd"
+    },
+    "tailwindcss-advanced-layouts": {
+      "source": "josiahsiegel/claude-plugin-marketplace",
+      "sourceType": "github",
+      "computedHash": "bf3eb96bcdcceb54cf2c0ba01daa18275c169627f37f5a861490c78e8055a5ce"
+    },
+    "tailwindcss-animations": {
+      "source": "josiahsiegel/claude-plugin-marketplace",
+      "sourceType": "github",
+      "computedHash": "49d9eb21d0046a936106389897d36c8f6c610239efa99701fba60efc59180362"
     },
     "test-master": {
       "source": "jeffallan/claude-skills",
