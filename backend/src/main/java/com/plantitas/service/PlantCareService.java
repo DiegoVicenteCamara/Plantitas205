@@ -5,9 +5,14 @@ import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
 import com.plantitas.model.Plant;
+import com.plantitas.model.PlantCategory;
+import com.plantitas.model.RequirementLevel;
 import com.plantitas.repository.PlantRepository;
+import com.plantitas.repository.PlantSpecifications;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -100,13 +105,23 @@ public class PlantCareService {
 	}
 
 	public List<PlantSearchItem> searchPlants(String query) {
+		return searchPlants(query, null, null, null);
+	}
+
+	public List<PlantSearchItem> searchPlants(String query, String category, String light, String water) {
 		String normalizedQuery = normalizeText(query, "");
-		if (normalizedQuery.isBlank()) {
-			return List.of();
-		}
+		PlantCategory normalizedCategory = parseCategory(category);
+		RequirementLevel lightThreshold = parseRequirementLevel(light, "light");
+		RequirementLevel waterThreshold = parseRequirementLevel(water, "water");
+
+		Specification<Plant> specification = Specification
+			.where(PlantSpecifications.commonOrScientificNameContains(normalizedQuery))
+			.and(PlantSpecifications.hasCategory(normalizedCategory))
+			.and(PlantSpecifications.lightRequirementAtMost(lightThreshold))
+			.and(PlantSpecifications.waterRequirementAtMost(waterThreshold));
 
 		return plantRepository
-			.findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc(normalizedQuery, normalizedQuery)
+			.findAll(specification, Sort.by(Sort.Direction.ASC, "commonName"))
 			.stream()
 			.map(plant -> new PlantSearchItem(plant.getId(), plant.getCommonName(), plant.getScientificName(), plant.getImageUrl()))
 			.toList();
@@ -186,6 +201,32 @@ public class PlantCareService {
 		}
 		String trimmed = value.trim();
 		return trimmed.isEmpty() ? defaultValue : trimmed;
+	}
+
+	private PlantCategory parseCategory(String category) {
+		String normalizedCategory = normalizeText(category, "");
+		if (normalizedCategory.isBlank()) {
+			return null;
+		}
+
+		try {
+			return PlantCategory.valueOf(normalizedCategory.toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException exception) {
+			throw new IllegalArgumentException("Valor inválido para category. Usa una categoría válida.");
+		}
+	}
+
+	private RequirementLevel parseRequirementLevel(String value, String fieldName) {
+		String normalizedValue = normalizeText(value, "");
+		if (normalizedValue.isBlank()) {
+			return null;
+		}
+
+		try {
+			return RequirementLevel.valueOf(normalizedValue.toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException exception) {
+			throw new IllegalArgumentException("Valor inválido para " + fieldName + ". Usa LOW, MEDIUM o HIGH.");
+		}
 	}
 
 	private String buildRecommendation(Plant plant, String season, WeatherData weatherData) {

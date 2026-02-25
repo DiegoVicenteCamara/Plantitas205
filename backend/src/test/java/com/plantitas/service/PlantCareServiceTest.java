@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,8 @@ import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
 import com.plantitas.model.Plant;
+import com.plantitas.model.PlantCategory;
+import com.plantitas.model.RequirementLevel;
 import com.plantitas.repository.PlantRepository;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -25,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 class PlantCareServiceTest {
@@ -325,17 +331,19 @@ class PlantCareServiceTest {
 
 	@Test
 	void searchPlants_returnsEmptyOnBlankQuery() {
+		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
+			.thenReturn(List.of());
 		List<PlantSearchItem> result = service.searchPlants("   ");
 
 		assertTrue(result.isEmpty());
-		verify(plantRepository, never()).findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc(anyString(), anyString());
+		verify(plantRepository).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName")));
 	}
 
 	@Test
 	void searchPlants_mapsRepositoryEntitiesToDto() {
 		Plant plant = createPlant(7L, "aloe-vera", "Aloe Vera", "Aloe barbadensis", true);
 		setField(plant, "imageUrl", "https://img.test/aloe.jpg");
-		when(plantRepository.findTop10ByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCaseOrderByCommonNameAsc("aloe", "aloe"))
+		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
 			.thenReturn(List.of(plant));
 
 		List<PlantSearchItem> result = service.searchPlants("aloe");
@@ -344,6 +352,80 @@ class PlantCareServiceTest {
 		assertEquals("Aloe Vera", result.getFirst().common_name());
 		assertEquals("Aloe barbadensis", result.getFirst().scientific_name());
 		assertEquals("https://img.test/aloe.jpg", result.getFirst().image_url());
+	}
+
+	@Test
+	void searchPlants_filtersByCategoryLightAndWaterThresholds() {
+		Plant low = createPlant(20L, "cactus", "Cactus", "Cactaceae", true);
+		setField(low, "category", PlantCategory.CACTUS);
+		setField(low, "lightRequirement", RequirementLevel.LOW);
+		setField(low, "waterRequirement", RequirementLevel.LOW);
+		Plant medium = createPlant(21L, "cactus2", "Cactus 2", "Cactaceae", true);
+		setField(medium, "category", PlantCategory.CACTUS);
+		setField(medium, "lightRequirement", RequirementLevel.MEDIUM);
+		setField(medium, "waterRequirement", RequirementLevel.MEDIUM);
+
+		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
+			.thenReturn(List.of(low));
+
+		List<PlantSearchItem> result = service.searchPlants(null, "cactus", "low", "low");
+
+		assertEquals(1, result.size());
+		assertEquals("Cactus", result.getFirst().common_name());
+	}
+
+	@Test
+	void searchPlants_supportsSingleOptionalFilter() {
+		Plant plant = createPlant(22L, "aloe", "Aloe", "Aloe vera", true);
+		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
+			.thenReturn(List.of(plant));
+
+		List<PlantSearchItem> result = service.searchPlants(null, null, "medium", null);
+
+		assertEquals(1, result.size());
+		assertEquals("Aloe", result.getFirst().common_name());
+	}
+
+	@Test
+	void searchPlants_withoutFiltersReturnsRepositoryResult() {
+		Plant plant = createPlant(23L, "ficus", "Ficus", "Ficus elastica", true);
+		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
+			.thenReturn(List.of(plant));
+
+		List<PlantSearchItem> result = service.searchPlants(null, null, null, null);
+
+		assertEquals(1, result.size());
+		assertEquals("Ficus", result.getFirst().common_name());
+	}
+
+	@Test
+	void searchPlants_throwsOnInvalidCategory() {
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> service.searchPlants(null, "invalid-category", null, null)
+		);
+
+		assertEquals("Valor inválido para category. Usa una categoría válida.", exception.getMessage());
+	}
+
+	@Test
+	void searchPlants_throwsOnInvalidLightValue() {
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> service.searchPlants(null, null, "extreme", null)
+		);
+
+		assertEquals("Valor inválido para light. Usa LOW, MEDIUM o HIGH.", exception.getMessage());
+	}
+
+	@Test
+	void searchPlants_throwsOnInvalidWaterValue() {
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> service.searchPlants(null, null, null, "extreme")
+		);
+
+		assertEquals("Valor inválido para water. Usa LOW, MEDIUM o HIGH.", exception.getMessage());
 	}
 
 	@Test

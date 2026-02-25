@@ -4,8 +4,9 @@ import com.plantitas.model.Plant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface PlantRepository extends JpaRepository<Plant, Long> {
+public interface PlantRepository extends JpaRepository<Plant, Long>, JpaSpecificationExecutor<Plant> {
 
 	@Override
 	Optional<Plant> findById(Long id);

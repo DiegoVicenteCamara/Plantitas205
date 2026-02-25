@@ -23,6 +23,10 @@ class PlantTest {
 		setField(plant, "idealHumidity", "60-80%");
 		setField(plant, "idealTemperature", "20-28 °C");
 		setField(plant, "toxicidad", "Moderada para mascotas");
+		setField(plant, "category", PlantCategory.INTERIOR);
+		setField(plant, "lightRequirement", RequirementLevel.MEDIUM);
+		setField(plant, "waterRequirement", RequirementLevel.LOW);
+		setField(plant, "humidityRequirement", RequirementLevel.HIGH);
 
 		assertEquals(15L, plant.getId());
 		assertEquals("peace-lily", plant.getSlug());
@@ -36,6 +40,10 @@ class PlantTest {
 		assertEquals("60-80%", plant.getIdealHumidity());
 		assertEquals("20-28 °C", plant.getIdealTemperature());
 		assertEquals("Moderada para mascotas", plant.getToxicidad());
+		assertEquals(PlantCategory.INTERIOR, plant.getCategory());
+		assertEquals(RequirementLevel.MEDIUM, plant.getLightRequirement());
+		assertEquals(RequirementLevel.LOW, plant.getWaterRequirement());
+		assertEquals(RequirementLevel.HIGH, plant.getHumidityRequirement());
 	}
 
 	private void setField(Object target, String fieldName, Object value) {
