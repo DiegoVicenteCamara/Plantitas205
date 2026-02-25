@@ -368,7 +368,7 @@ class PlantCareServiceTest {
 		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
 			.thenReturn(List.of(low));
 
-		List<PlantSearchItem> result = service.searchPlants(null, "cactus", "low", "low");
+		List<PlantSearchItem> result = service.searchPlants(null, "cactus", "low", "low", "low");
 
 		assertEquals(1, result.size());
 		assertEquals("Cactus", result.getFirst().common_name());
@@ -380,7 +380,7 @@ class PlantCareServiceTest {
 		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
 			.thenReturn(List.of(plant));
 
-		List<PlantSearchItem> result = service.searchPlants(null, null, "medium", null);
+		List<PlantSearchItem> result = service.searchPlants(null, null, "medium", null, null);
 
 		assertEquals(1, result.size());
 		assertEquals("Aloe", result.getFirst().common_name());
@@ -392,7 +392,7 @@ class PlantCareServiceTest {
 		when(plantRepository.findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "commonName"))))
 			.thenReturn(List.of(plant));
 
-		List<PlantSearchItem> result = service.searchPlants(null, null, null, null);
+		List<PlantSearchItem> result = service.searchPlants(null, null, null, null, null);
 
 		assertEquals(1, result.size());
 		assertEquals("Ficus", result.getFirst().common_name());
@@ -402,7 +402,7 @@ class PlantCareServiceTest {
 	void searchPlants_throwsOnInvalidCategory() {
 		IllegalArgumentException exception = assertThrows(
 			IllegalArgumentException.class,
-			() -> service.searchPlants(null, "invalid-category", null, null)
+			() -> service.searchPlants(null, "invalid-category", null, null, null)
 		);
 
 		assertEquals("Valor inválido para category. Usa una categoría válida.", exception.getMessage());
@@ -412,7 +412,7 @@ class PlantCareServiceTest {
 	void searchPlants_throwsOnInvalidLightValue() {
 		IllegalArgumentException exception = assertThrows(
 			IllegalArgumentException.class,
-			() -> service.searchPlants(null, null, "extreme", null)
+			() -> service.searchPlants(null, null, "extreme", null, null)
 		);
 
 		assertEquals("Valor inválido para light. Usa LOW, MEDIUM o HIGH.", exception.getMessage());
@@ -422,10 +422,20 @@ class PlantCareServiceTest {
 	void searchPlants_throwsOnInvalidWaterValue() {
 		IllegalArgumentException exception = assertThrows(
 			IllegalArgumentException.class,
-			() -> service.searchPlants(null, null, null, "extreme")
+			() -> service.searchPlants(null, null, null, "extreme", null)
 		);
 
 		assertEquals("Valor inválido para water. Usa LOW, MEDIUM o HIGH.", exception.getMessage());
+	}
+
+	@Test
+	void searchPlants_throwsOnInvalidHumidityValue() {
+		IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class,
+			() -> service.searchPlants(null, null, null, null, "extreme")
+		);
+
+		assertEquals("Valor inválido para humidity. Usa LOW, MEDIUM o HIGH.", exception.getMessage());
 	}
 
 	@Test

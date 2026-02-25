@@ -33,8 +33,21 @@ export async function fetchPlantCare(payload) {
 	return response.json();
 }
 
-export async function searchPlants(query) {
-	const response = await fetch(`${API_BASE_URL}/api/plants/search?q=${encodeURIComponent(query)}`);
+export async function searchPlants(query, filters = {}) {
+	const params = new URLSearchParams();
+
+	if (typeof query === "string" && query.trim()) {
+		params.set("q", query.trim());
+	}
+
+	["category", "light", "water", "humidity"].forEach((key) => {
+		const value = filters?.[key];
+		if (typeof value === "string" && value.trim()) {
+			params.set(key, value.trim());
+		}
+	});
+
+	const response = await fetch(`${API_BASE_URL}/api/plants/search?${params.toString()}`);
 
 	if (!response.ok) {
 		throw new Error("Request failed");

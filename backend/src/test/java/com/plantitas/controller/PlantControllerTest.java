@@ -103,7 +103,7 @@ class PlantControllerTest {
 			new PlantSearchItem(1L, "Aloe", "Aloe barbadensis", null),
 			new PlantSearchItem(2L, "Ficus", "Ficus elastica", null)
 		);
-		when(plantCareService.searchPlants("al", null, null, null)).thenReturn(items);
+		when(plantCareService.searchPlants("al", null, null, null, null)).thenReturn(items);
 
 		mockMvc.perform(get("/api/plants/search").param("q", "al"))
 			.andExpect(status().isOk())
@@ -114,12 +114,13 @@ class PlantControllerTest {
 	@Test
 	void getPlantsSearch_supportsCombinedFilters() throws Exception {
 		List<PlantSearchItem> items = List.of(new PlantSearchItem(3L, "Cactus", "Cactaceae", null));
-		when(plantCareService.searchPlants(null, "cactus", "low", "low")).thenReturn(items);
+		when(plantCareService.searchPlants(null, "cactus", "low", "low", "low")).thenReturn(items);
 
 		mockMvc.perform(get("/api/plants/search")
 				.param("category", "cactus")
 				.param("light", "low")
-				.param("water", "low"))
+				.param("water", "low")
+				.param("humidity", "low"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data", hasSize(1)))
 			.andExpect(jsonPath("$.data[0].common_name").value("Cactus"));
@@ -127,10 +128,19 @@ class PlantControllerTest {
 
 	@Test
 	void getPlantsSearch_returnsBadRequestOnInvalidFilterValue() throws Exception {
-		when(plantCareService.searchPlants(null, "invalid", null, null))
+		when(plantCareService.searchPlants(null, "invalid", null, null, null))
 			.thenThrow(new IllegalArgumentException("Valor inválido para category. Usa una categoría válida."));
 
 		mockMvc.perform(get("/api/plants/search").param("category", "invalid"))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void getPlantsSearch_returnsBadRequestOnInvalidHumidityValue() throws Exception {
+		when(plantCareService.searchPlants(null, null, null, null, "extreme"))
+			.thenThrow(new IllegalArgumentException("Valor inválido para humidity. Usa LOW, MEDIUM o HIGH."));
+
+		mockMvc.perform(get("/api/plants/search").param("humidity", "extreme"))
 			.andExpect(status().isBadRequest());
 	}
 

@@ -105,20 +105,22 @@ public class PlantCareService {
 	}
 
 	public List<PlantSearchItem> searchPlants(String query) {
-		return searchPlants(query, null, null, null);
+		return searchPlants(query, null, null, null, null);
 	}
 
-	public List<PlantSearchItem> searchPlants(String query, String category, String light, String water) {
+	public List<PlantSearchItem> searchPlants(String query, String category, String light, String water, String humidity) {
 		String normalizedQuery = normalizeText(query, "");
 		PlantCategory normalizedCategory = parseCategory(category);
 		RequirementLevel lightThreshold = parseRequirementLevel(light, "light");
 		RequirementLevel waterThreshold = parseRequirementLevel(water, "water");
+		RequirementLevel humidityThreshold = parseRequirementLevel(humidity, "humidity");
 
 		Specification<Plant> specification = Specification
 			.where(PlantSpecifications.commonOrScientificNameContains(normalizedQuery))
 			.and(PlantSpecifications.hasCategory(normalizedCategory))
-			.and(PlantSpecifications.lightRequirementAtMost(lightThreshold))
-			.and(PlantSpecifications.waterRequirementAtMost(waterThreshold));
+			.and(PlantSpecifications.lightRequirementEquals(lightThreshold))
+			.and(PlantSpecifications.waterRequirementEquals(waterThreshold))
+			.and(PlantSpecifications.humidityRequirementEquals(humidityThreshold));
 
 		return plantRepository
 			.findAll(specification, Sort.by(Sort.Direction.ASC, "commonName"))

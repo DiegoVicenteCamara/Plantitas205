@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPlantCare, searchPlants } from "../services/plantCareService.js";
 import MapSelector from "../components/MapSelector.jsx";
+import AdvancedFilters from "../components/AdvancedFilters.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
@@ -17,10 +18,24 @@ export default function Home() {
 	const [searchError, setSearchError] = useState("");
 	const [showResults, setShowResults] = useState(false);
 	const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+	const [advancedFilters, setAdvancedFilters] = useState({
+		category: "",
+		light: "",
+		water: "",
+		humidity: ""
+	});
+
+	const handleAdvancedFiltersChange = (partialFilters) => {
+		setAdvancedFilters((previousFilters) => ({
+			...previousFilters,
+			...partialFilters
+		}));
+	};
 
 	useEffect(() => {
 		const query = searchQuery.trim();
-		if (!query) {
+		const hasAnyFilter = Object.values(advancedFilters).some((value) => typeof value === "string" && value.trim() !== "");
+		if (!query && !hasAnyFilter) {
 			setSearchResults([]);
 			setSearchLoading(false);
 			setSearchError("");
@@ -32,7 +47,7 @@ export default function Home() {
 			setSearchLoading(true);
 			setSearchError("");
 			try {
-				const response = await searchPlants(query);
+				const response = await searchPlants(query, advancedFilters);
 				if (!cancelled) {
 					setSearchResults(response.data ?? []);
 				}
@@ -52,7 +67,7 @@ export default function Home() {
 			cancelled = true;
 			clearTimeout(timeoutId);
 		};
-	}, [searchQuery]);
+	}, [searchQuery, advancedFilters]);
 
 	useEffect(() => {
 		setActiveSuggestionIndex(-1);
@@ -122,6 +137,7 @@ export default function Home() {
 				<h2>Tu jardín en contexto real</h2>
 				<p>Busca plantas, elige tu ubicación en el mapa y recibe recomendaciones claras para cada temporada.</p>
 				<div className="home-hero-search">
+					<AdvancedFilters value={advancedFilters} onChange={handleAdvancedFiltersChange} />
 					<label>
 						Buscar planta
 						<div className="search-combobox">
@@ -178,10 +194,10 @@ export default function Home() {
 					</label>
 					{searchLoading && <p className="home-muted">Buscando...</p>}
 					{searchError && <p className="error">{searchError}</p>}
-					{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
+					{(searchQuery.trim() || Object.values(advancedFilters).some((value) => value)) && !searchLoading && searchResults.length === 0 && !searchError && (
 						<p className="home-muted">No se encontraron plantas.</p>
 					)}
-					{!searchQuery.trim() && !searchLoading && !searchError && (
+					{!searchQuery.trim() && !Object.values(advancedFilters).some((value) => value) && !searchLoading && !searchError && (
 						<p className="home-muted">Empieza escribiendo para descubrir plantas disponibles.</p>
 					)}
 				</div>

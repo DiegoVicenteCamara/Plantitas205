@@ -52,10 +52,11 @@ public class PlantController {
 		@RequestParam(value = "q", required = false) String query,
 		@RequestParam(value = "category", required = false) String category,
 		@RequestParam(value = "light", required = false) String light,
-		@RequestParam(value = "water", required = false) String water
+		@RequestParam(value = "water", required = false) String water,
+		@RequestParam(value = "humidity", required = false) String humidity
 	) {
 		try {
-			return new PlantSearchResponse(plantCareService.searchPlants(query, category, light, water));
+			return new PlantSearchResponse(plantCareService.searchPlants(query, category, light, water, humidity));
 		} catch (IllegalArgumentException exception) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
 		}

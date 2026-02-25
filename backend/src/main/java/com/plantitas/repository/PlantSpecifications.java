@@ -3,7 +3,6 @@ package com.plantitas.repository;
 import com.plantitas.model.Plant;
 import com.plantitas.model.PlantCategory;
 import com.plantitas.model.RequirementLevel;
-import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class PlantSpecifications {
@@ -30,21 +29,22 @@ public final class PlantSpecifications {
 		return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get("category"), category);
 	}
 
-	public static Specification<Plant> lightRequirementAtMost(RequirementLevel threshold) {
-		return requirementAtMost("lightRequirement", threshold);
+	public static Specification<Plant> lightRequirementEquals(RequirementLevel level) {
+		return requirementEquals("lightRequirement", level);
 	}
 
-	public static Specification<Plant> waterRequirementAtMost(RequirementLevel threshold) {
-		return requirementAtMost("waterRequirement", threshold);
+	public static Specification<Plant> waterRequirementEquals(RequirementLevel level) {
+		return requirementEquals("waterRequirement", level);
 	}
 
-	private static Specification<Plant> requirementAtMost(String fieldName, RequirementLevel threshold) {
-		if (threshold == null) {
+	public static Specification<Plant> humidityRequirementEquals(RequirementLevel level) {
+		return requirementEquals("humidityRequirement", level);
+	}
+
+	private static Specification<Plant> requirementEquals(String fieldName, RequirementLevel level) {
+		if (level == null) {
 			return null;
 		}
-
-		List<RequirementLevel> acceptedLevels = List.of(RequirementLevel.values())
-			.subList(0, threshold.ordinal() + 1);
-		return (root, criteriaQuery, criteriaBuilder) -> root.get(fieldName).in(acceptedLevels);
+		return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(fieldName), level);
 	}
 }
