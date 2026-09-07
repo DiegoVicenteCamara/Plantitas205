@@ -17,6 +17,7 @@ import com.plantitas.dto.PlantCareRequest;
 import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
+import com.plantitas.exception.ResourceNotFoundException;
 import com.plantitas.model.Plant;
 import com.plantitas.model.PlantCategory;
 import com.plantitas.model.RequirementLevel;
@@ -324,7 +325,7 @@ class PlantCareServiceTest {
 
 		PlantCareRequest request = new PlantCareRequest("not-found", "Madrid", null, null, "verano");
 
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.getPlantCare(request));
+		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.getPlantCare(request));
 
 		assertEquals("No existe una planta de prueba para el valor indicado.", exception.getMessage());
 	}
@@ -349,9 +350,9 @@ class PlantCareServiceTest {
 		List<PlantSearchItem> result = service.searchPlants("aloe");
 
 		assertEquals(1, result.size());
-		assertEquals("Aloe Vera", result.getFirst().common_name());
-		assertEquals("Aloe barbadensis", result.getFirst().scientific_name());
-		assertEquals("https://img.test/aloe.jpg", result.getFirst().image_url());
+		assertEquals("Aloe Vera", result.getFirst().commonName());
+		assertEquals("Aloe barbadensis", result.getFirst().scientificName());
+		assertEquals("https://img.test/aloe.jpg", result.getFirst().imageUrl());
 	}
 
 	@Test
@@ -371,7 +372,7 @@ class PlantCareServiceTest {
 		List<PlantSearchItem> result = service.searchPlants(null, "cactus", "low", "low", "low");
 
 		assertEquals(1, result.size());
-		assertEquals("Cactus", result.getFirst().common_name());
+		assertEquals("Cactus", result.getFirst().commonName());
 	}
 
 	@Test
@@ -383,7 +384,7 @@ class PlantCareServiceTest {
 		List<PlantSearchItem> result = service.searchPlants(null, null, "medium", null, null);
 
 		assertEquals(1, result.size());
-		assertEquals("Aloe", result.getFirst().common_name());
+		assertEquals("Aloe", result.getFirst().commonName());
 	}
 
 	@Test
@@ -395,7 +396,7 @@ class PlantCareServiceTest {
 		List<PlantSearchItem> result = service.searchPlants(null, null, null, null, null);
 
 		assertEquals(1, result.size());
-		assertEquals("Ficus", result.getFirst().common_name());
+		assertEquals("Ficus", result.getFirst().commonName());
 	}
 
 	@Test
@@ -469,13 +470,13 @@ class PlantCareServiceTest {
 
 		assertEquals(12L, result.id());
 		assertEquals("aloe-vera", result.slug());
-		assertEquals("Aloe Vera", result.common_name());
-		assertEquals("Aloe barbadensis", result.scientific_name());
-		assertEquals("https://image.test/aloe.jpg", result.image_url());
-		assertTrue(result.indoor_friendly());
-		assertNull(result.ideal_climate());
-		assertEquals("20-28 °C", result.ideal_temperature());
-		assertNull(result.ideal_humidity());
+		assertEquals("Aloe Vera", result.commonName());
+		assertEquals("Aloe barbadensis", result.scientificName());
+		assertEquals("https://image.test/aloe.jpg", result.imageUrl());
+		assertTrue(result.indoorFriendly());
+		assertNull(result.idealClimate());
+		assertEquals("20-28 °C", result.idealTemperature());
+		assertNull(result.idealHumidity());
 		assertNull(result.toxicidad());
 	}
 
@@ -483,7 +484,7 @@ class PlantCareServiceTest {
 	void getPlantById_throwsWhenNotFound() {
 		when(plantRepository.findById(999L)).thenReturn(Optional.empty());
 
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.getPlantById(999L));
+		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.getPlantById(999L));
 
 		assertEquals("No existe una planta con ese ID.", exception.getMessage());
 	}

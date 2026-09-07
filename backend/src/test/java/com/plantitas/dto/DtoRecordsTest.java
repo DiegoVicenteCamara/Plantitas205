@@ -52,9 +52,9 @@ class DtoRecordsTest {
 		PlantSearchResponse response = new PlantSearchResponse(List.of(item));
 
 		assertEquals(1L, item.id());
-		assertEquals("Aloe", item.common_name());
-		assertEquals("Aloe barbadensis", item.scientific_name());
-		assertEquals("https://img.test/aloe.jpg", item.image_url());
+		assertEquals("Aloe", item.commonName());
+		assertEquals("Aloe barbadensis", item.scientificName());
+		assertEquals("https://img.test/aloe.jpg", item.imageUrl());
 		assertEquals(1, response.data().size());
 	}
 
@@ -75,9 +75,9 @@ class DtoRecordsTest {
 			"Moderada para mascotas"
 		);
 
-		assertEquals("Tropical", detail.ideal_climate());
-		assertEquals("20-28 °C", detail.ideal_temperature());
-		assertEquals("60-80%", detail.ideal_humidity());
+		assertEquals("Tropical", detail.idealClimate());
+		assertEquals("20-28 °C", detail.idealTemperature());
+		assertEquals("60-80%", detail.idealHumidity());
 		assertEquals("Moderada para mascotas", detail.toxicidad());
 	}
 }

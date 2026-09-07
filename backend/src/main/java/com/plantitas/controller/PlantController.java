@@ -6,7 +6,7 @@ import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchResponse;
 import com.plantitas.service.PlantCareService;
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "${cors.allowed-origin:http://localhost:5173}")
 public class PlantController {
 
 	private final PlantCareService plantCareService;
@@ -30,21 +29,8 @@ public class PlantController {
 
 	@PostMapping("/plant-care")
 	public PlantCareResponse getPlantCare(@RequestBody PlantCareRequest request) {
-		try {
-			validateLocationRequest(request);
-			return plantCareService.getPlantCare(request);
-		} catch (IllegalArgumentException exception) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
-		}
-	}
-
-	private void validateLocationRequest(PlantCareRequest request) {
-		boolean hasLatitude = request.latitude() != null;
-		boolean hasLongitude = request.longitude() != null;
-
-		if (hasLatitude != hasLongitude) {
-			throw new IllegalArgumentException("Debes enviar latitude y longitude juntas.");
-		}
+		validateLocationRequest(request);
+		return plantCareService.getPlantCare(request);
 	}
 
 	@GetMapping("/plants/search")
@@ -55,11 +41,7 @@ public class PlantController {
 		@RequestParam(value = "water", required = false) String water,
 		@RequestParam(value = "humidity", required = false) String humidity
 	) {
-		try {
-			return new PlantSearchResponse(plantCareService.searchPlants(query, category, light, water, humidity));
-		} catch (IllegalArgumentException exception) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
-		}
+		return new PlantSearchResponse(plantCareService.searchPlants(query, category, light, water, humidity));
 	}
 
 	@GetMapping("/plants/suggestions")
@@ -69,10 +51,15 @@ public class PlantController {
 
 	@GetMapping("/plants/{id}")
 	public PlantDetailResponse getPlantById(@PathVariable Long id) {
-		try {
-			return plantCareService.getPlantById(id);
-		} catch (IllegalArgumentException exception) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+		return plantCareService.getPlantById(id);
+	}
+
+	private void validateLocationRequest(PlantCareRequest request) {
+		boolean hasLatitude = request.latitude() != null;
+		boolean hasLongitude = request.longitude() != null;
+
+		if (hasLatitude != hasLongitude) {
+			throw new IllegalArgumentException("Debes enviar latitude y longitude juntas.");
 		}
 	}
 }

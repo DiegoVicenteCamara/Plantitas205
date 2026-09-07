@@ -4,6 +4,7 @@ import com.plantitas.dto.PlantCareRequest;
 import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
+import com.plantitas.exception.ResourceNotFoundException;
 import com.plantitas.model.Plant;
 import com.plantitas.model.PlantCategory;
 import com.plantitas.model.RequirementLevel;
@@ -11,12 +12,17 @@ import com.plantitas.repository.PlantRepository;
 import com.plantitas.repository.PlantSpecifications;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PlantCareService {
+
+	private static final Logger log = LoggerFactory.getLogger(PlantCareService.class);
 
 	private final PlantRepository plantRepository;
 	private final WeatherClient weatherClient;
@@ -33,6 +39,8 @@ public class PlantCareService {
 	}
 
 	public PlantCareResponse getPlantCare(PlantCareRequest request) {
+		log.debug("Processing plant care request for plantId={}, season={}", request.plantId(), request.season());
+
 		Plant plant = resolvePlant(request.plantId());
 		String normalizedSeason = normalizeSeason(request.season());
 		LocationResolution locationResolution = resolveLocationForClimate(request);
@@ -43,6 +51,8 @@ public class PlantCareService {
 
 		String summary = "Para " + plant.getCommonName() + " en " + city + " durante " + normalizedSeason + ".";
 		String recommendation = buildRecommendation(plant, normalizedSeason, weatherData);
+
+		log.debug("Plant care resolved: plant={}, city={}, quality={}", plant.getCommonName(), city, dataQuality);
 
 		return new PlantCareResponse(
 			plant.getCommonName(),
@@ -74,6 +84,7 @@ public class PlantCareService {
 				&& weatherData.precipitation() == null;
 			return new WeatherResolution(weatherData, weatherFallback);
 		} catch (RuntimeException exception) {
+			log.warn("Weather lookup failed for ({}, {}): {}", request.latitude(), request.longitude(), exception.getMessage());
 			return new WeatherResolution(WeatherData.empty(), true);
 		}
 	}
@@ -87,6 +98,7 @@ public class PlantCareService {
 				boolean geocodeFallback = resolvedCity == null || resolvedCity.trim().isEmpty();
 				return new LocationResolution(normalizedCity, geocodeFallback);
 			} catch (RuntimeException exception) {
+				log.warn("Reverse geocoding failed for ({}, {}): {}", request.latitude(), request.longitude(), exception.getMessage());
 				return new LocationResolution(fallbackCity, true);
 			}
 		}
@@ -115,18 +127,27 @@ public class PlantCareService {
 		RequirementLevel waterThreshold = parseRequirementLevel(water, "water");
 		RequirementLevel humidityThreshold = parseRequirementLevel(humidity, "humidity");
 
-		Specification<Plant> specification = Specification
-			.where(PlantSpecifications.commonOrScientificNameContains(normalizedQuery))
-			.and(PlantSpecifications.hasCategory(normalizedCategory))
-			.and(PlantSpecifications.lightRequirementEquals(lightThreshold))
-			.and(PlantSpecifications.waterRequirementEquals(waterThreshold))
-			.and(PlantSpecifications.humidityRequirementEquals(humidityThreshold));
+		Specification<Plant> specification = buildSearchSpecification(
+			normalizedQuery, normalizedCategory, lightThreshold, waterThreshold, humidityThreshold
+		);
 
 		return plantRepository
 			.findAll(specification, Sort.by(Sort.Direction.ASC, "commonName"))
 			.stream()
 			.map(plant -> new PlantSearchItem(plant.getId(), plant.getCommonName(), plant.getScientificName(), plant.getImageUrl()))
 			.toList();
+	}
+
+	private Specification<Plant> buildSearchSpecification(
+		String query, PlantCategory category,
+		RequirementLevel light, RequirementLevel water, RequirementLevel humidity
+	) {
+		return Specification
+			.where(PlantSpecifications.commonOrScientificNameContains(query))
+			.and(PlantSpecifications.hasCategory(category))
+			.and(PlantSpecifications.lightRequirementEquals(light))
+			.and(PlantSpecifications.waterRequirementEquals(water))
+			.and(PlantSpecifications.humidityRequirementEquals(humidity));
 	}
 
 	public List<String> suggestPlantNames(String prefix) {
@@ -145,22 +166,22 @@ public class PlantCareService {
 	public PlantDetailResponse getPlantById(Long id) {
 		Plant plant = plantRepository
 			.findById(id)
-			.orElseThrow(() -> new IllegalArgumentException("No existe una planta con ese ID."));
+			.orElseThrow(() -> new ResourceNotFoundException("No existe una planta con ese ID."));
 
-		return new PlantDetailResponse(
-			plant.getId(),
-			plant.getSlug(),
-			plant.getCommonName(),
-			plant.getScientificName(),
-			plant.getImageUrl(),
-			plant.isIndoorFriendly(),
-			plant.getWateringRecommendation(),
-			plant.getLightRecommendation(),
-			plant.getIdealClimate(),
-			plant.getIdealTemperature(),
-			plant.getIdealHumidity(),
-			plant.getToxicidad()
-		);
+		return PlantDetailResponse.builder()
+			.id(plant.getId())
+			.slug(plant.getSlug())
+			.commonName(plant.getCommonName())
+			.scientificName(plant.getScientificName())
+			.imageUrl(plant.getImageUrl())
+			.indoorFriendly(plant.isIndoorFriendly())
+			.wateringRecommendation(plant.getWateringRecommendation())
+			.lightRecommendation(plant.getLightRecommendation())
+			.idealClimate(plant.getIdealClimate())
+			.idealTemperature(plant.getIdealTemperature())
+			.idealHumidity(plant.getIdealHumidity())
+			.toxicidad(plant.getToxicidad())
+			.build();
 	}
 
 	private Plant resolvePlant(String plantId) {
@@ -169,22 +190,25 @@ public class PlantCareService {
 			throw new IllegalArgumentException("El identificador de la planta es obligatorio.");
 		}
 
-		return tryFindByNumericId(normalizedPlantId)
-			.or(() -> plantRepository.findBySlugIgnoreCase(normalizedPlantId))
-			.or(() -> plantRepository
-				.findByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCase(normalizedPlantId, normalizedPlantId)
-				.stream()
-				.findFirst())
-			.orElseThrow(() -> new IllegalArgumentException("No existe una planta de prueba para el valor indicado."));
+		return findPlantByIdOrSlugOrName(normalizedPlantId)
+			.orElseThrow(() -> new ResourceNotFoundException("No existe una planta de prueba para el valor indicado."));
 	}
 
-	private java.util.Optional<Plant> tryFindByNumericId(String candidate) {
-		try {
-			long id = Long.parseLong(candidate);
-			return plantRepository.findById(id);
-		} catch (NumberFormatException exception) {
-			return java.util.Optional.empty();
+	private Optional<Plant> findPlantByIdOrSlugOrName(String candidate) {
+		return tryParseLong(candidate)
+			.flatMap(plantRepository::findById)
+			.or(() -> plantRepository.findBySlugIgnoreCase(candidate))
+			.or(() -> plantRepository
+				.findByCommonNameContainingIgnoreCaseOrScientificNameContainingIgnoreCase(candidate, candidate)
+				.stream()
+				.findFirst());
+	}
+
+	private Optional<Long> tryParseLong(String value) {
+		if (value.chars().allMatch(Character::isDigit)) {
+			return Optional.of(Long.parseLong(value));
 		}
+		return Optional.empty();
 	}
 
 	private String normalizeSeason(String season) {
@@ -267,24 +291,18 @@ public class PlantCareService {
 
 		if (weatherData.humidity() != null) {
 			if (weatherData.humidity() >= 80) {
-				if (hasSegment) {
-					tipBuilder.append("; ");
-				}
+				if (hasSegment) tipBuilder.append("; ");
 				tipBuilder.append("humedad elevada, evita encharcamientos");
 				hasSegment = true;
 			} else if (weatherData.humidity() <= 30) {
-				if (hasSegment) {
-					tipBuilder.append("; ");
-				}
+				if (hasSegment) tipBuilder.append("; ");
 				tipBuilder.append("humedad baja, considera aumentar humedad ambiental");
 				hasSegment = true;
 			}
 		}
 
 		if (weatherData.precipitation() != null && weatherData.precipitation() > 0) {
-			if (hasSegment) {
-				tipBuilder.append("; ");
-			}
+			if (hasSegment) tipBuilder.append("; ");
 			tipBuilder.append("hay precipitación reciente, revisa drenaje antes de añadir más agua");
 			hasSegment = true;
 		}
@@ -296,15 +314,9 @@ public class PlantCareService {
 		return tipBuilder.append('.').toString();
 	}
 
-	private record LocationResolution(
-		String city,
-		boolean geocodeFallback
-	) {
+	private record LocationResolution(String city, boolean geocodeFallback) {
 	}
 
-	private record WeatherResolution(
-		WeatherData weatherData,
-		boolean weatherFallback
-	) {
+	private record WeatherResolution(WeatherData weatherData, boolean weatherFallback) {
 	}
 }

@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
+import com.plantitas.exception.ResourceNotFoundException;
 import com.plantitas.service.PlantCareService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -181,7 +182,7 @@ class PlantControllerTest {
 
 	@Test
 	void getPlantById_returnsNotFoundWhenPlantDoesNotExist() throws Exception {
-		when(plantCareService.getPlantById(999L)).thenThrow(new IllegalArgumentException("No existe una planta con ese ID."));
+		when(plantCareService.getPlantById(999L)).thenThrow(new ResourceNotFoundException("No existe una planta con ese ID."));
 
 		mockMvc.perform(get("/api/plants/999"))
 			.andExpect(status().isNotFound());
