@@ -220,8 +220,26 @@ a:focus-visible {
 }
 
 .advanced-filters__toggle {
-	justify-content: space-between;
-	width: 100%;
+	justify-self: start;
+	white-space: nowrap;
+}
+
+.advanced-filters__icon,
+.advanced-filters__chevron {
+	display: inline-flex;
+	align-items: center;
+	color: var(--color-text-muted);
+}
+
+.advanced-filters__footer {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.advanced-filters__reset {
+	flex-shrink: 0;
+	white-space: nowrap;
+	font-size: 0.85rem;
 }
 
 .advanced-filters__panel {
@@ -246,6 +264,10 @@ a:focus-visible {
 }
 
 .advanced-filters__chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
 	padding: calc(var(--space-xs) + 0.1rem) calc(var(--space-sm) + 0.1rem);
 	border-radius: 999px;
 	border: 1px solid var(--color-control-border);

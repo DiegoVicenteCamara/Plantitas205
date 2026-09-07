@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const CATEGORY_OPTIONS = [
 	{ value: "", label: "Todas" },
@@ -30,29 +30,28 @@ const DEFAULT_FILTERS = {
 
 export default function AdvancedFilters({
 	value = DEFAULT_FILTERS,
-	onChange,
+	onFilterChange,
+	onReset,
 	idPrefix = "advanced-filters"
 }) {
 	const filters = useMemo(() => ({ ...DEFAULT_FILTERS, ...value }), [value]);
-	const [isOpen, setIsOpen] = useState(() => {
-		if (typeof window === "undefined") {
-			return true;
-		}
-		return !window.matchMedia("(max-width: 899px)").matches;
-	});
+	const [isOpen, setIsOpen] = useState(false);
 
-	useEffect(() => {
-		const mediaQuery = window.matchMedia("(max-width: 899px)");
-		const updateExpandedState = () => setIsOpen(!mediaQuery.matches);
-		updateExpandedState();
-		mediaQuery.addEventListener("change", updateExpandedState);
-		return () => mediaQuery.removeEventListener("change", updateExpandedState);
-	}, []);
+	const hasActiveFilters = Object.values(filters).some((filterValue) => filterValue !== "");
 
 	const updateFilter = (key, nextValue) => {
-		onChange?.({
+		onFilterChange?.({
+			...filters,
 			[key]: nextValue
 		});
+	};
+
+	const handleReset = () => {
+		if (onReset) {
+			onReset();
+			return;
+		}
+		onFilterChange?.(DEFAULT_FILTERS);
 	};
 
 	const panelId = `${idPrefix}-panel`;
@@ -66,8 +65,24 @@ export default function AdvancedFilters({
 				aria-expanded={isOpen}
 				aria-controls={panelId}
 			>
-				Filtros Avanzados
-				<span aria-hidden="true">{isOpen ? "▴" : "▾"}</span>
+				<span className="advanced-filters__icon" aria-hidden="true">
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+					</svg>
+				</span>
+				Filtros
+				<span className="advanced-filters__chevron" aria-hidden="true">
+					{isOpen ? "▴" : "▾"}
+				</span>
 			</button>
 
 			{isOpen && (
@@ -115,6 +130,17 @@ export default function AdvancedFilters({
 						onChange={(nextValue) => updateFilter("humidity", nextValue)}
 						options={LEVEL_OPTIONS}
 					/>
+				</div>
+
+				<div className="advanced-filters__footer">
+					<button
+						type="button"
+						className="btn advanced-filters__reset"
+						onClick={handleReset}
+						disabled={!hasActiveFilters}
+					>
+						Limpiar filtros
+					</button>
 				</div>
 				</div>
 			)}

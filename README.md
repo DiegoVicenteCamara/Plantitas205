@@ -14,7 +14,7 @@ A full-stack plant care assistant that provides personalized watering, lighting,
 | Maps | Leaflet + react-leaflet | 1.9 / 4.2 |
 | Styling | CSS Custom Properties (design tokens) | - |
 | Build | Maven / npm | 3.9 / 10 |
-| Testing | JUnit 5 + Mockito + MockMvc | - |
+| Testing | JUnit 5 + Mockito + MockMvc (backend), Vitest + React Testing Library (frontend) | - |
 | Coverage | JaCoCo | 0.8.12 |
 | AI Agents | Copilot + `.agents/skills/` framework | - |
 
@@ -43,10 +43,18 @@ npm run dev
 
 ### Tests & Coverage
 
+**Backend:**
 ```bash
 cd backend
 ./mvnw verify                  # Linux/macOS
 mvnw.cmd verify                # Windows
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm test                        # single run
+npm run test:watch              # watch mode
 ```
 
 Coverage report: `backend/target/site/jacoco/index.html`

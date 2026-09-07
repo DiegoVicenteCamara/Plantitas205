@@ -31,8 +31,17 @@ export default function Home() {
 		handleKeyDown,
 	} = usePlantSearch(advancedFilters);
 
-	const handleAdvancedFiltersChange = (partialFilters) => {
-		setAdvancedFilters((prev) => ({ ...prev, ...partialFilters }));
+	const handleAdvancedFiltersChange = (nextFilters) => {
+		setAdvancedFilters(nextFilters);
+	};
+
+	const handleAdvancedFiltersReset = () => {
+		setAdvancedFilters({
+			category: "",
+			light: "",
+			water: "",
+			humidity: "",
+		});
 	};
 
 	const handleSearchKeyDown = (event) => {
@@ -73,7 +82,11 @@ export default function Home() {
 				<h2>Tu jardín en contexto real</h2>
 				<p>Busca plantas, elige tu ubicación en el mapa y recibe recomendaciones claras para cada temporada.</p>
 				<div className="home-hero-search">
-					<AdvancedFilters value={advancedFilters} onChange={handleAdvancedFiltersChange} />
+					<AdvancedFilters
+						value={advancedFilters}
+						onFilterChange={handleAdvancedFiltersChange}
+						onReset={handleAdvancedFiltersReset}
+					/>
 					<label>
 						Buscar planta
 						<div className="search-combobox">
