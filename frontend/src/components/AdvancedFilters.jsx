@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 const CATEGORY_OPTIONS = [
 	{ value: "", label: "Todas" },
@@ -21,6 +21,23 @@ const LEVEL_OPTIONS = [
 	{ value: "high", label: "Alto" }
 ];
 
+const PRESET_OPTIONS = [
+	{ value: "", label: "Cualquiera" },
+	{ value: "low-maintenance", label: "Bajo mantenimiento" },
+	{ value: "moderate", label: "Moderado" },
+	{ value: "high-maintenance", label: "Alto mantenimiento" },
+	{ value: "tropical", label: "Tropical" },
+	{ value: "dry", label: "Seco" }
+];
+
+const PRESET_MAP = {
+	"low-maintenance": { light: "low", water: "low", humidity: "low" },
+	"moderate": { light: "medium", water: "medium", humidity: "medium" },
+	"high-maintenance": { light: "high", water: "high", humidity: "high" },
+	"tropical": { light: "medium", water: "medium", humidity: "high" },
+	"dry": { light: "high", water: "low", humidity: "low" }
+};
+
 const DEFAULT_FILTERS = {
 	category: "",
 	light: "",
@@ -34,100 +51,123 @@ export default function AdvancedFilters({
 	idPrefix = "advanced-filters"
 }) {
 	const filters = useMemo(() => ({ ...DEFAULT_FILTERS, ...value }), [value]);
-	const [isOpen, setIsOpen] = useState(() => {
-		if (typeof window === "undefined") {
-			return true;
-		}
-		return !window.matchMedia("(max-width: 899px)").matches;
-	});
 
-	useEffect(() => {
-		const mediaQuery = window.matchMedia("(max-width: 899px)");
-		const updateExpandedState = () => setIsOpen(!mediaQuery.matches);
-		updateExpandedState();
-		mediaQuery.addEventListener("change", updateExpandedState);
-		return () => mediaQuery.removeEventListener("change", updateExpandedState);
-	}, []);
+	const activeCount = useMemo(() => {
+		let count = 0;
+		if (filters.category) count++;
+		if (filters.light) count++;
+		if (filters.water) count++;
+		if (filters.humidity) count++;
+		return count;
+	}, [filters]);
+
+	const currentPreset = useMemo(() => {
+		const { light, water, humidity } = filters;
+		if (!light && !water && !humidity) return "";
+		for (const [key, values] of Object.entries(PRESET_MAP)) {
+			if (values.light === light && values.water === water && values.humidity === humidity) {
+				return key;
+			}
+		}
+		return "__custom";
+	}, [filters]);
 
 	const updateFilter = (key, nextValue) => {
-		onChange?.({
-			[key]: nextValue
-		});
+		onChange?.({ [key]: nextValue });
 	};
 
-	const panelId = `${idPrefix}-panel`;
+	const handlePresetChange = (presetKey) => {
+		if (!presetKey || presetKey === "__custom") {
+			onChange?.({ light: "", water: "", humidity: "" });
+			return;
+		}
+		const values = PRESET_MAP[presetKey];
+		if (values) {
+			onChange?.(values);
+		}
+	};
+
+	const clearAll = () => {
+		onChange?.({ category: "", light: "", water: "", humidity: "" });
+	};
 
 	return (
-		<section className="advanced-filters" aria-label="Filtros avanzados de búsqueda">
-			<button
-				type="button"
-				className="btn btn--secondary advanced-filters__toggle"
-				onClick={() => setIsOpen((previous) => !previous)}
-				aria-expanded={isOpen}
-				aria-controls={panelId}
-			>
-				Filtros Avanzados
-				<span aria-hidden="true">{isOpen ? "▴" : "▾"}</span>
-			</button>
+		<section className="advanced-filters" aria-label="Filtros de búsqueda">
+			<div className="advanced-filters__header">
+				<span className="advanced-filters__title">
+					Filtros
+					{activeCount > 0 && (
+						<span className="advanced-filters__badge">{activeCount}</span>
+					)}
+				</span>
+				{activeCount > 0 && (
+					<button
+						type="button"
+						className="btn btn--ghost advanced-filters__clear"
+						onClick={clearAll}
+					>
+						Limpiar
+					</button>
+				)}
+			</div>
 
-			{isOpen && (
-				<div
-					id={panelId}
-					className="advanced-filters__panel advanced-filters__panel--open"
-				>
-				<div className="advanced-filters__group" role="group" aria-labelledby={`${idPrefix}-category-label`}>
-					<p id={`${idPrefix}-category-label`} className="advanced-filters__label">Categoría</p>
-					<div className="advanced-filters__chips" role="radiogroup" aria-label="Categoría">
-						{CATEGORY_OPTIONS.map((option) => (
-							<button
-								type="button"
-								key={option.value || "all"}
-								className={`advanced-filters__chip ${filters.category === option.value ? "advanced-filters__chip--active" : ""}`}
-								onClick={() => updateFilter("category", option.value)}
-								role="radio"
-								aria-checked={filters.category === option.value}
-							>
-								{option.label}
-							</button>
-						))}
-					</div>
-				</div>
+			<div className="advanced-filters__row">
+				<FilterSelect
+					label="Categoría"
+					name="category"
+					value={filters.category}
+					onChange={(v) => updateFilter("category", v)}
+					options={CATEGORY_OPTIONS}
+					idPrefix={idPrefix}
+				/>
+				<FilterSelect
+					label="Perfil ambiental"
+					name="preset"
+					value={currentPreset === "__custom" ? "" : currentPreset}
+					onChange={handlePresetChange}
+					options={PRESET_OPTIONS}
+					idPrefix={idPrefix}
+				/>
+			</div>
 
-				<div className="advanced-filters__grid">
+			{currentPreset === "__custom" && (
+				<div className="advanced-filters__row advanced-filters__row--detail">
 					<FilterSelect
-						label="Nivel de luz"
+						label="Luz"
 						name="light"
 						value={filters.light}
-						onChange={(nextValue) => updateFilter("light", nextValue)}
+						onChange={(v) => updateFilter("light", v)}
 						options={LEVEL_OPTIONS}
+						idPrefix={idPrefix}
 					/>
 					<FilterSelect
-						label="Necesidad de agua"
+						label="Agua"
 						name="water"
 						value={filters.water}
-						onChange={(nextValue) => updateFilter("water", nextValue)}
+						onChange={(v) => updateFilter("water", v)}
 						options={LEVEL_OPTIONS}
+						idPrefix={idPrefix}
 					/>
 					<FilterSelect
 						label="Humedad"
 						name="humidity"
 						value={filters.humidity}
-						onChange={(nextValue) => updateFilter("humidity", nextValue)}
+						onChange={(v) => updateFilter("humidity", v)}
 						options={LEVEL_OPTIONS}
+						idPrefix={idPrefix}
 					/>
-				</div>
 				</div>
 			)}
 		</section>
 	);
 }
 
-function FilterSelect({ label, name, value, onChange, options }) {
+function FilterSelect({ label, name, value, onChange, options, idPrefix = "advanced-filters" }) {
 	return (
-		<label htmlFor={`advanced-filter-${name}`} className="advanced-filters__field">
-			{label}
+		<label htmlFor={`${idPrefix}-${name}`} className="advanced-filters__field">
+			<span className="advanced-filters__field-label">{label}</span>
 			<select
-				id={`advanced-filter-${name}`}
+				id={`${idPrefix}-${name}`}
 				name={name}
 				value={value}
 				onChange={(event) => onChange(event.target.value)}

@@ -13,6 +13,9 @@ import com.plantitas.repository.PlantSpecifications;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -52,6 +55,11 @@ public class PlantCareService {
 		String summary = "Para " + plant.getCommonName() + " en " + city + " durante " + normalizedSeason + ".";
 		String recommendation = buildRecommendation(plant, normalizedSeason, weatherData);
 
+		String idealTemperature = plant.getIdealTemperature();
+		String idealHumidity = plant.getIdealHumidity();
+		Boolean temperatureInRange = isInRange(weatherData.temperature(), idealTemperature);
+		Boolean humidityInRange = isInRange(weatherData.humidity() != null ? (double) weatherData.humidity() : null, idealHumidity);
+
 		log.debug("Plant care resolved: plant={}, city={}, quality={}", plant.getCommonName(), city, dataQuality);
 
 		return new PlantCareResponse(
@@ -64,7 +72,11 @@ public class PlantCareService {
 			weatherData.temperature(),
 			weatherData.humidity(),
 			weatherData.altitude(),
-			dataQuality
+			dataQuality,
+			idealTemperature,
+			idealHumidity,
+			temperatureInRange,
+			humidityInRange
 		);
 	}
 
@@ -253,6 +265,50 @@ public class PlantCareService {
 		} catch (IllegalArgumentException exception) {
 			throw new IllegalArgumentException("Valor inválido para " + fieldName + ". Usa LOW, MEDIUM o HIGH.");
 		}
+	}
+
+	private static final Pattern RANGE_PATTERN = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*[-–]\\s*(\\d+(?:\\.\\d+)?)");
+
+	private OptionalDouble parseRangeMin(String rangeText) {
+		if (rangeText == null || rangeText.isBlank()) {
+			return OptionalDouble.empty();
+		}
+		Matcher matcher = RANGE_PATTERN.matcher(rangeText);
+		if (matcher.find()) {
+			try {
+				return OptionalDouble.of(Double.parseDouble(matcher.group(1)));
+			} catch (NumberFormatException e) {
+				return OptionalDouble.empty();
+			}
+		}
+		return OptionalDouble.empty();
+	}
+
+	private OptionalDouble parseRangeMax(String rangeText) {
+		if (rangeText == null || rangeText.isBlank()) {
+			return OptionalDouble.empty();
+		}
+		Matcher matcher = RANGE_PATTERN.matcher(rangeText);
+		if (matcher.find()) {
+			try {
+				return OptionalDouble.of(Double.parseDouble(matcher.group(2)));
+			} catch (NumberFormatException e) {
+				return OptionalDouble.empty();
+			}
+		}
+		return OptionalDouble.empty();
+	}
+
+	private Boolean isInRange(Double actual, String rangeText) {
+		if (actual == null || rangeText == null || rangeText.isBlank()) {
+			return null;
+		}
+		OptionalDouble min = parseRangeMin(rangeText);
+		OptionalDouble max = parseRangeMax(rangeText);
+		if (min.isEmpty() || max.isEmpty()) {
+			return null;
+		}
+		return actual >= min.getAsDouble() && actual <= max.getAsDouble();
 	}
 
 	private String buildRecommendation(Plant plant, String season, WeatherData weatherData) {

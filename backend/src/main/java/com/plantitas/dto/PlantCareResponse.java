@@ -10,6 +10,10 @@ public record PlantCareResponse(
 	Double temperature,
 	Integer humidity,
 	Double altitude,
-	String dataQuality
+	String dataQuality,
+	String idealTemperature,
+	String idealHumidity,
+	Boolean temperatureInRange,
+	Boolean humidityInRange
 ) {
 }
