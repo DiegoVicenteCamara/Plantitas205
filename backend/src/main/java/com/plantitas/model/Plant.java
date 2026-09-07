@@ -2,6 +2,8 @@ package com.plantitas.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -47,6 +49,22 @@ public class Plant {
 
 	@Column(name = "toxicidad")
 	private String toxicidad;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PlantCategory category;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "light_requirement", nullable = false)
+	private RequirementLevel lightRequirement;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "water_requirement", nullable = false)
+	private RequirementLevel waterRequirement;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "humidity_requirement", nullable = false)
+	private RequirementLevel humidityRequirement;
 
 	public Long getId() {
 		return id;
@@ -94,5 +112,21 @@ public class Plant {
 
 	public String getToxicidad() {
 		return toxicidad;
+	}
+
+	public PlantCategory getCategory() {
+		return category;
+	}
+
+	public RequirementLevel getLightRequirement() {
+		return lightRequirement;
+	}
+
+	public RequirementLevel getWaterRequirement() {
+		return waterRequirement;
+	}
+
+	public RequirementLevel getHumidityRequirement() {
+		return humidityRequirement;
 	}
 }

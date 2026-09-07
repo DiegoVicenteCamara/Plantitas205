@@ -12,45 +12,49 @@ async function resolveErrorMessage(response, fallbackMessage) {
 	} catch {
 		// ignore parsing errors and use fallback message
 	}
-
 	return fallbackMessage;
+}
+
+async function handleResponse(response, fallbackMessage) {
+	if (!response.ok) {
+		const message = await resolveErrorMessage(response, fallbackMessage);
+		throw new Error(message);
+	}
+	return response.json();
 }
 
 export async function fetchPlantCare(payload) {
 	const response = await fetch(`${API_BASE_URL}/api/plant-care`, {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(payload)
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload),
 	});
-
-	if (!response.ok) {
-		const message = await resolveErrorMessage(response, "No se pudo obtener la recomendación.");
-		throw new Error(message);
-	}
-
-	return response.json();
+	return handleResponse(response, "No se pudo obtener la recomendación.");
 }
 
-export async function searchPlants(query) {
-	const response = await fetch(`${API_BASE_URL}/api/plants/search?q=${encodeURIComponent(query)}`);
+export async function searchPlants(query, filters = {}) {
+	const params = new URLSearchParams();
 
-	if (!response.ok) {
-		throw new Error("Request failed");
+	if (typeof query === "string" && query.trim()) {
+		params.set("q", query.trim());
 	}
 
-	return response.json();
+	["category", "light", "water", "humidity"].forEach((key) => {
+		const value = filters?.[key];
+		if (typeof value === "string" && value.trim()) {
+			params.set(key, value.trim());
+		}
+	});
+
+	const response = await fetch(`${API_BASE_URL}/api/plants/search?${params.toString()}`);
+	return handleResponse(response, "No se pudo buscar plantas.");
 }
 
 export async function fetchPlantSuggestions(prefix) {
-	const response = await fetch(`${API_BASE_URL}/api/plants/suggestions?prefix=${encodeURIComponent(prefix)}`);
-
-	if (!response.ok) {
-		throw new Error("Request failed");
-	}
-
-	return response.json();
+	const response = await fetch(
+		`${API_BASE_URL}/api/plants/suggestions?prefix=${encodeURIComponent(prefix)}`
+	);
+	return handleResponse(response, "No se pudieron obtener sugerencias.");
 }
 
 export async function fetchPlantById(id) {
@@ -60,7 +64,8 @@ export async function fetchPlantById(id) {
 		if (response.status === 404) {
 			throw new Error("PLANT_NOT_FOUND");
 		}
-		throw new Error("REQUEST_FAILED");
+		const message = await resolveErrorMessage(response, "No se pudo cargar la planta.");
+		throw new Error(message);
 	}
 
 	return response.json();

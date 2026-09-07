@@ -1,87 +1,28 @@
-import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchPlantById } from "../services/plantCareService.js";
+import usePlantDetail from "../hooks/usePlantDetail.js";
+import { toDisplayValue, toIndoorDisplay } from "../utils/display.js";
+
+function buildClimateRecommendation(plantData) {
+	if (!plantData) return "Desconocido";
+
+	const fields = [
+		toDisplayValue(plantData.ideal_climate),
+		toDisplayValue(plantData.ideal_temperature),
+		toDisplayValue(plantData.ideal_humidity),
+		toDisplayValue(plantData.watering_recommendation),
+		toDisplayValue(plantData.light_recommendation),
+	];
+
+	if (fields.every((f) => f === "Desconocido")) return "Desconocido";
+
+	const [climate, temp, humidity, watering, light] = fields;
+	return `Para un clima ${climate}, mantén la planta cerca de ${temp} con humedad ${humidity}. Prioriza ${watering.toLowerCase()} y ${light.toLowerCase()}.`;
+}
 
 export default function PlantDetail() {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const [plant, setPlant] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-
-	const toDisplayValue = (value) => {
-		if (value === null || value === undefined) {
-			return "Desconocido";
-		}
-		if (typeof value === "string") {
-			const trimmedValue = value.trim();
-			return trimmedValue ? trimmedValue : "Desconocido";
-		}
-		return String(value);
-	};
-
-	const toIndoorDisplay = (value) => {
-		if (typeof value === "boolean") {
-			return value ? "Sí" : "No";
-		}
-		return "Desconocido";
-	};
-
-	const buildClimateRecommendation = (plantData) => {
-		if (!plantData) {
-			return "Desconocido";
-		}
-
-		const idealClimate = toDisplayValue(plantData.ideal_climate);
-		const idealTemperature = toDisplayValue(plantData.ideal_temperature);
-		const idealHumidity = toDisplayValue(plantData.ideal_humidity);
-		const watering = toDisplayValue(plantData.watering_recommendation);
-		const light = toDisplayValue(plantData.light_recommendation);
-
-		if (
-			idealClimate === "Desconocido"
-			&& idealTemperature === "Desconocido"
-			&& idealHumidity === "Desconocido"
-			&& watering === "Desconocido"
-			&& light === "Desconocido"
-		) {
-			return "Desconocido";
-		}
-
-		return `Para un clima ${idealClimate}, mantén la planta cerca de ${idealTemperature} con humedad ${idealHumidity}. Prioriza ${watering.toLowerCase()} y ${light.toLowerCase()}.`;
-	};
-
-	useEffect(() => {
-		let cancelled = false;
-
-		const loadPlant = async () => {
-			setLoading(true);
-			setError("");
-			try {
-				const data = await fetchPlantById(id);
-				if (!cancelled) {
-					setPlant(data);
-				}
-			} catch (loadError) {
-				if (!cancelled) {
-					setPlant(null);
-					setError(loadError.message === "PLANT_NOT_FOUND"
-						? "La planta no existe."
-						: "No se pudo cargar la información de la planta.");
-				}
-			} finally {
-				if (!cancelled) {
-					setLoading(false);
-				}
-			}
-		};
-
-		loadPlant();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [id]);
+	const { plant, loading, error } = usePlantDetail(id);
 
 	return (
 		<main className="content">
@@ -150,7 +91,9 @@ export default function PlantDetail() {
 						</aside>
 					</div>
 				)}
-				<button type="button" className="btn btn--secondary plant-detail-back-button" onClick={() => navigate("/")}>Volver al Home</button>
+				<button type="button" className="btn btn--secondary plant-detail-back-button" onClick={() => navigate("/")}>
+					Volver al Home
+				</button>
 			</section>
 		</main>
 	);
