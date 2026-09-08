@@ -31,7 +31,11 @@ class DtoRecordsTest {
 			21.3,
 			55,
 			650.0,
-			"full"
+			"full",
+			"20-28 °C",
+			"60-80%",
+			true,
+			false
 		);
 
 		assertEquals("Monstera", response.plantId());
@@ -44,6 +48,10 @@ class DtoRecordsTest {
 		assertEquals(55, response.humidity());
 		assertEquals(650.0, response.altitude());
 		assertEquals("full", response.dataQuality());
+		assertEquals("20-28 °C", response.idealTemperature());
+		assertEquals("60-80%", response.idealHumidity());
+		assertEquals(true, response.temperatureInRange());
+		assertEquals(false, response.humidityInRange());
 	}
 
 	@Test

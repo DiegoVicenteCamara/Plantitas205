@@ -44,7 +44,11 @@ class PlantControllerTest {
 			23.1,
 			60,
 			667.0,
-			"full"
+			"full",
+			"20-28 °C",
+			"60-80%",
+			true,
+			false
 		);
 		when(plantCareService.getPlantCare(any())).thenReturn(response);
 
