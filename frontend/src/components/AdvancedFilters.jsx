@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const CATEGORY_OPTIONS = [
 	{ value: "", label: "Todas" },
@@ -47,69 +47,60 @@ const DEFAULT_FILTERS = {
 
 export default function AdvancedFilters({
 	value = DEFAULT_FILTERS,
-	onChange,
+	onFilterChange,
+	onReset,
 	idPrefix = "advanced-filters"
 }) {
 	const filters = useMemo(() => ({ ...DEFAULT_FILTERS, ...value }), [value]);
+	const [isOpen, setIsOpen] = useState(false);
 
-	const activeCount = useMemo(() => {
-		let count = 0;
-		if (filters.category) count++;
-		if (filters.light) count++;
-		if (filters.water) count++;
-		if (filters.humidity) count++;
-		return count;
-	}, [filters]);
-
-	const currentPreset = useMemo(() => {
-		const { light, water, humidity } = filters;
-		if (!light && !water && !humidity) return "";
-		for (const [key, values] of Object.entries(PRESET_MAP)) {
-			if (values.light === light && values.water === water && values.humidity === humidity) {
-				return key;
-			}
-		}
-		return "__custom";
-	}, [filters]);
+	const hasActiveFilters = Object.values(filters).some((filterValue) => filterValue !== "");
 
 	const updateFilter = (key, nextValue) => {
-		onChange?.({ [key]: nextValue });
+		onFilterChange?.({
+			...filters,
+			[key]: nextValue
+		});
 	};
 
-	const handlePresetChange = (presetKey) => {
-		if (!presetKey || presetKey === "__custom") {
-			onChange?.({ light: "", water: "", humidity: "" });
+	const handleReset = () => {
+		if (onReset) {
+			onReset();
 			return;
 		}
-		const values = PRESET_MAP[presetKey];
-		if (values) {
-			onChange?.(values);
-		}
+		onFilterChange?.(DEFAULT_FILTERS);
 	};
 
-	const clearAll = () => {
-		onChange?.({ category: "", light: "", water: "", humidity: "" });
-	};
+	const panelId = `${idPrefix}-panel`;
 
 	return (
-		<section className="advanced-filters" aria-label="Filtros de búsqueda">
-			<div className="advanced-filters__header">
-				<span className="advanced-filters__title">
-					Filtros
-					{activeCount > 0 && (
-						<span className="advanced-filters__badge">{activeCount}</span>
-					)}
-				</span>
-				{activeCount > 0 && (
-					<button
-						type="button"
-						className="btn btn--ghost advanced-filters__clear"
-						onClick={clearAll}
+		<section className="advanced-filters" aria-label="Filtros avanzados de búsqueda">
+			<button
+				type="button"
+				className="btn btn--secondary advanced-filters__toggle"
+				onClick={() => setIsOpen((previous) => !previous)}
+				aria-expanded={isOpen}
+				aria-controls={panelId}
+			>
+				<span className="advanced-filters__icon" aria-hidden="true">
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
 					>
-						Limpiar
-					</button>
-				)}
-			</div>
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+					</svg>
+				</span>
+				Filtros
+				<span className="advanced-filters__chevron" aria-hidden="true">
+					{isOpen ? "▴" : "▾"}
+				</span>
+			</button>
 
 			<div className="advanced-filters__row">
 				<FilterSelect
@@ -156,6 +147,18 @@ export default function AdvancedFilters({
 						options={LEVEL_OPTIONS}
 						idPrefix={idPrefix}
 					/>
+				</div>
+
+				<div className="advanced-filters__footer">
+					<button
+						type="button"
+						className="btn advanced-filters__reset"
+						onClick={handleReset}
+						disabled={!hasActiveFilters}
+					>
+						Limpiar filtros
+					</button>
+				</div>
 				</div>
 			)}
 		</section>

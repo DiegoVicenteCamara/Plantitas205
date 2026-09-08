@@ -219,10 +219,36 @@ a:focus-visible {
 	background: color-mix(in srgb, var(--color-surface) 94%, var(--color-accent-leaf) 6%);
 }
 
-.advanced-filters__header {
-	display: flex;
+.advanced-filters__toggle {
+	justify-self: start;
+	white-space: nowrap;
+}
+
+.advanced-filters__icon,
+.advanced-filters__chevron {
+	display: inline-flex;
 	align-items: center;
-	justify-content: space-between;
+	color: var(--color-text-muted);
+}
+
+.advanced-filters__footer {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.advanced-filters__reset {
+	flex-shrink: 0;
+	white-space: nowrap;
+	font-size: 0.85rem;
+}
+
+.advanced-filters__panel {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.advanced-filters__group {
+	display: grid;
 	gap: var(--space-sm);
 }
 
@@ -234,13 +260,12 @@ a:focus-visible {
 	gap: var(--space-xs);
 }
 
-.advanced-filters__badge {
+.advanced-filters__chip {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 1.25rem;
-	height: 1.25rem;
-	padding: 0 0.35rem;
+	min-height: 44px;
+	padding: calc(var(--space-xs) + 0.1rem) calc(var(--space-sm) + 0.1rem);
 	border-radius: 999px;
 	background: var(--color-primary);
 	color: var(--color-surface);
