@@ -210,6 +210,96 @@ a:focus-visible {
 	margin-top: var(--space-sm);
 }
 
+.advanced-filters {
+	display: grid;
+	gap: var(--space-sm);
+	padding: var(--space-sm) var(--space-md);
+	border-radius: var(--radius-md);
+	border: 1px solid var(--surface-soft-border);
+	background: color-mix(in srgb, var(--color-surface) 94%, var(--color-accent-leaf) 6%);
+}
+
+.advanced-filters__toggle {
+	justify-self: start;
+	white-space: nowrap;
+}
+
+.advanced-filters__icon,
+.advanced-filters__chevron {
+	display: inline-flex;
+	align-items: center;
+	color: var(--color-text-muted);
+}
+
+.advanced-filters__footer {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.advanced-filters__reset {
+	flex-shrink: 0;
+	white-space: nowrap;
+	font-size: 0.85rem;
+}
+
+.advanced-filters__panel {
+	display: grid;
+	gap: var(--space-md);
+}
+
+.advanced-filters__group {
+	display: grid;
+	gap: var(--space-sm);
+}
+
+.advanced-filters__title {
+	font-weight: 700;
+	font-size: var(--font-size-sm);
+	display: flex;
+	align-items: center;
+	gap: var(--space-xs);
+}
+
+.advanced-filters__chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: calc(var(--space-xs) + 0.1rem) calc(var(--space-sm) + 0.1rem);
+	border-radius: 999px;
+	background: var(--color-primary);
+	color: var(--color-surface);
+	font-size: var(--font-size-xs);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.advanced-filters__clear {
+	font-size: var(--font-size-xs);
+	padding: 0.15rem 0.5rem;
+}
+
+.advanced-filters__row {
+	display: grid;
+	gap: var(--space-sm);
+	grid-template-columns: 1fr 1fr;
+}
+
+.advanced-filters__row--detail {
+	grid-template-columns: 1fr 1fr 1fr;
+}
+
+.advanced-filters__field {
+	display: grid;
+	gap: calc(var(--space-xs) + 0.1rem);
+}
+
+.advanced-filters__field-label {
+	font-weight: 600;
+	font-size: var(--font-size-xs);
+	color: var(--color-text-muted);
+}
+
 .search-combobox {
 	position: relative;
 	width: 100%;
@@ -352,6 +442,19 @@ button {
 	background: var(--color-toggle-bg);
 	border-color: var(--color-toggle-border);
 	color: var(--color-toggle-text);
+}
+
+.btn--ghost {
+	background: transparent;
+	border-color: transparent;
+	color: var(--color-text-muted);
+	padding: 0.15rem 0.5rem;
+	font-size: var(--font-size-xs);
+}
+
+.btn--ghost:hover {
+	color: var(--color-text);
+	background: color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 
 .btn--primary:hover,
@@ -662,6 +765,10 @@ button:disabled {
 
 	.home-context-block--map .map-selector__map {
 		height: 320px;
+	}
+
+	.advanced-filters__row--detail {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 }

@@ -10,5 +10,9 @@ CREATE TABLE plants (
     ideal_climate VARCHAR(120),
     ideal_humidity VARCHAR(120),
     ideal_temperature VARCHAR(120),
-    toxicidad VARCHAR(80)
+    toxicidad VARCHAR(80),
+    category VARCHAR(40) NOT NULL,
+    light_requirement VARCHAR(10) NOT NULL,
+    water_requirement VARCHAR(10) NOT NULL,
+    humidity_requirement VARCHAR(10) NOT NULL
 );

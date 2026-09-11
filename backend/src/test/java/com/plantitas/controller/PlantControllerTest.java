@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.plantitas.dto.PlantCareResponse;
 import com.plantitas.dto.PlantDetailResponse;
 import com.plantitas.dto.PlantSearchItem;
+import com.plantitas.exception.ResourceNotFoundException;
 import com.plantitas.service.PlantCareService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,11 @@ class PlantControllerTest {
 			23.1,
 			60,
 			667.0,
-			"full"
+			"full",
+			"20-28 °C",
+			"60-80%",
+			true,
+			false
 		);
 		when(plantCareService.getPlantCare(any())).thenReturn(response);
 
@@ -103,12 +108,45 @@ class PlantControllerTest {
 			new PlantSearchItem(1L, "Aloe", "Aloe barbadensis", null),
 			new PlantSearchItem(2L, "Ficus", "Ficus elastica", null)
 		);
-		when(plantCareService.searchPlants("al")).thenReturn(items);
+		when(plantCareService.searchPlants("al", null, null, null, null)).thenReturn(items);
 
 		mockMvc.perform(get("/api/plants/search").param("q", "al"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data", hasSize(2)))
 			.andExpect(jsonPath("$.data[0].common_name").value("Aloe"));
+	}
+
+	@Test
+	void getPlantsSearch_supportsCombinedFilters() throws Exception {
+		List<PlantSearchItem> items = List.of(new PlantSearchItem(3L, "Cactus", "Cactaceae", null));
+		when(plantCareService.searchPlants(null, "cactus", "low", "low", "low")).thenReturn(items);
+
+		mockMvc.perform(get("/api/plants/search")
+				.param("category", "cactus")
+				.param("light", "low")
+				.param("water", "low")
+				.param("humidity", "low"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data", hasSize(1)))
+			.andExpect(jsonPath("$.data[0].common_name").value("Cactus"));
+	}
+
+	@Test
+	void getPlantsSearch_returnsBadRequestOnInvalidFilterValue() throws Exception {
+		when(plantCareService.searchPlants(null, "invalid", null, null, null))
+			.thenThrow(new IllegalArgumentException("Valor inválido para category. Usa una categoría válida."));
+
+		mockMvc.perform(get("/api/plants/search").param("category", "invalid"))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void getPlantsSearch_returnsBadRequestOnInvalidHumidityValue() throws Exception {
+		when(plantCareService.searchPlants(null, null, null, null, "extreme"))
+			.thenThrow(new IllegalArgumentException("Valor inválido para humidity. Usa LOW, MEDIUM o HIGH."));
+
+		mockMvc.perform(get("/api/plants/search").param("humidity", "extreme"))
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -148,7 +186,7 @@ class PlantControllerTest {
 
 	@Test
 	void getPlantById_returnsNotFoundWhenPlantDoesNotExist() throws Exception {
-		when(plantCareService.getPlantById(999L)).thenThrow(new IllegalArgumentException("No existe una planta con ese ID."));
+		when(plantCareService.getPlantById(999L)).thenThrow(new ResourceNotFoundException("No existe una planta con ese ID."));
 
 		mockMvc.perform(get("/api/plants/999"))
 			.andExpect(status().isNotFound());

@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { fetchPlantCare, searchPlants } from "../services/plantCareService.js";
-import MapSelector from "../components/MapSelector.jsx";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import usePlantSearch from "../hooks/usePlantSearch.js";
+import MapSelector from "../components/MapSelector.jsx";
+import AdvancedFilters from "../components/AdvancedFilters.jsx";
+import { fetchPlantCare } from "../services/plantCareService.js";
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -11,87 +13,42 @@ export default function Home() {
 	const [result, setResult] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
-	const [searchQuery, setSearchQuery] = useState("");
-	const [searchResults, setSearchResults] = useState([]);
-	const [searchLoading, setSearchLoading] = useState(false);
-	const [searchError, setSearchError] = useState("");
-	const [showResults, setShowResults] = useState(false);
-	const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+	const [advancedFilters, setAdvancedFilters] = useState({
+		category: "",
+		light: "",
+		water: "",
+		humidity: "",
+	});
 
-	useEffect(() => {
-		const query = searchQuery.trim();
-		if (!query) {
-			setSearchResults([]);
-			setSearchLoading(false);
-			setSearchError("");
-			return;
-		}
+	const {
+		query: searchQuery,
+		setQuery: setSearchQuery,
+		results: searchResults,
+		loading: searchLoading,
+		error: searchError,
+		activeIndex,
+		setActiveIndex,
+		handleKeyDown,
+	} = usePlantSearch(advancedFilters);
 
-		let cancelled = false;
-		const timeoutId = setTimeout(async () => {
-			setSearchLoading(true);
-			setSearchError("");
-			try {
-				const response = await searchPlants(query);
-				if (!cancelled) {
-					setSearchResults(response.data ?? []);
-				}
-			} catch (error) {
-				if (!cancelled) {
-					setSearchResults([]);
-					setSearchError("No se pudo buscar en la base local.");
-				}
-			} finally {
-				if (!cancelled) {
-					setSearchLoading(false);
-				}
-			}
-		}, 300);
+	const handleAdvancedFiltersChange = (nextFilters) => {
+		setAdvancedFilters(nextFilters);
+	};
 
-		return () => {
-			cancelled = true;
-			clearTimeout(timeoutId);
-		};
-	}, [searchQuery]);
-
-	useEffect(() => {
-		setActiveSuggestionIndex(-1);
-	}, [searchResults, showResults]);
+	const handleAdvancedFiltersReset = () => {
+		setAdvancedFilters({
+			category: "",
+			light: "",
+			water: "",
+			humidity: "",
+		});
+	};
 
 	const handleSearchKeyDown = (event) => {
-		if (!showResults || searchResults.length === 0) {
-			return;
-		}
-
-		if (event.key === "ArrowDown") {
-			event.preventDefault();
-			setActiveSuggestionIndex((previousIndex) =>
-				previousIndex < searchResults.length - 1 ? previousIndex + 1 : 0
-			);
-			return;
-		}
-
-		if (event.key === "ArrowUp") {
-			event.preventDefault();
-			setActiveSuggestionIndex((previousIndex) =>
-				previousIndex > 0 ? previousIndex - 1 : searchResults.length - 1
-			);
-			return;
-		}
-
-		if (event.key === "Enter" && activeSuggestionIndex >= 0) {
-			event.preventDefault();
-			const selectedPlant = searchResults[activeSuggestionIndex];
-			if (selectedPlant) {
-				setShowResults(false);
-				navigate(`/planta/${selectedPlant.id}`);
-			}
-			return;
-		}
-
-		if (event.key === "Escape") {
-			setShowResults(false);
-		}
+		handleKeyDown(event, {
+			onSelect: (plant) => navigate(`/planta/${plant.id}`),
+			onEscape: () => {},
+		});
 	};
 
 	const handleSubmit = async (event) => {
@@ -104,9 +61,12 @@ export default function Home() {
 		setError("");
 		setLoading(true);
 		try {
-			const latitude = location.lat;
-			const longitude = location.lng;
-			const response = await fetchPlantCare({ plantId, season, latitude, longitude });
+			const response = await fetchPlantCare({
+				plantId,
+				season,
+				latitude: location.lat,
+				longitude: location.lng,
+			});
 			setResult(response);
 		} catch (err) {
 			setError(err?.message || "No se pudo obtener la recomendación.");
@@ -122,6 +82,11 @@ export default function Home() {
 				<h2>Tu jardín en contexto real</h2>
 				<p>Busca plantas, elige tu ubicación en el mapa y recibe recomendaciones claras para cada temporada.</p>
 				<div className="home-hero-search">
+					<AdvancedFilters
+						value={advancedFilters}
+						onFilterChange={handleAdvancedFiltersChange}
+						onReset={handleAdvancedFiltersReset}
+					/>
 					<label>
 						Buscar planta
 						<div className="search-combobox">
@@ -133,39 +98,36 @@ export default function Home() {
 									value={searchQuery}
 									onChange={(event) => {
 										setSearchQuery(event.target.value);
-										setShowResults(true);
-										setActiveSuggestionIndex(-1);
+										setActiveIndex(-1);
 									}}
-									onFocus={() => setShowResults(true)}
-									onBlur={() => {
-										setTimeout(() => setShowResults(false), 120);
-									}}
+									onFocus={() => setActiveIndex(-1)}
 									onKeyDown={handleSearchKeyDown}
 									placeholder="ej: fern"
 									required
 									role="combobox"
-									aria-expanded={showResults && searchResults.length > 0}
+									aria-expanded={searchResults.length > 0}
 									aria-controls="plant-search-suggestions"
 									aria-autocomplete="list"
-									aria-activedescendant={activeSuggestionIndex >= 0 ? `plant-suggestion-${searchResults[activeSuggestionIndex]?.id}` : undefined}
+									aria-activedescendant={
+										activeIndex >= 0
+											? `plant-suggestion-${searchResults[activeIndex]?.id}`
+											: undefined
+									}
 								/>
 							</div>
-							{showResults && searchResults.length > 0 && (
+							{searchResults.length > 0 && (
 								<ul className="suggestions-list" id="plant-search-suggestions" role="listbox">
 									{searchResults.map((plant, index) => (
 										<li key={plant.id}>
 											<button
 												type="button"
 												id={`plant-suggestion-${plant.id}`}
-												className={`suggestion-item ${activeSuggestionIndex === index ? "suggestion-item--active" : ""}`}
-												onMouseEnter={() => setActiveSuggestionIndex(index)}
+												className={`suggestion-item ${activeIndex === index ? "suggestion-item--active" : ""}`}
+												onMouseEnter={() => setActiveIndex(index)}
 												onMouseDown={(event) => event.preventDefault()}
-												onClick={() => {
-													setShowResults(false);
-													navigate(`/planta/${plant.id}`);
-												}}
+												onClick={() => navigate(`/planta/${plant.id}`)}
 												role="option"
-												aria-selected={activeSuggestionIndex === index}
+												aria-selected={activeIndex === index}
 											>
 												{plant.common_name ?? "Sin nombre común"}
 												{plant.scientific_name ? ` · ${plant.scientific_name}` : ""}
@@ -178,12 +140,18 @@ export default function Home() {
 					</label>
 					{searchLoading && <p className="home-muted">Buscando...</p>}
 					{searchError && <p className="error">{searchError}</p>}
-					{searchQuery.trim() && !searchLoading && searchResults.length === 0 && !searchError && (
-						<p className="home-muted">No se encontraron plantas.</p>
-					)}
-					{!searchQuery.trim() && !searchLoading && !searchError && (
-						<p className="home-muted">Empieza escribiendo para descubrir plantas disponibles.</p>
-					)}
+					{searchQuery.trim() &&
+						!searchLoading &&
+						searchResults.length === 0 &&
+						!searchError && (
+							<p className="home-muted">No se encontraron plantas.</p>
+						)}
+					{!searchQuery.trim() &&
+						!Object.values(advancedFilters).some((v) => v) &&
+						!searchLoading &&
+						!searchError && (
+							<p className="home-muted">Empieza escribiendo para descubrir plantas disponibles.</p>
+						)}
 				</div>
 			</section>
 
@@ -232,10 +200,20 @@ export default function Home() {
 									<p><strong>Ciudad:</strong> {result.city}</p>
 									<p><strong>Época:</strong> {result.season}</p>
 									{typeof result.temperature === "number" && (
-										<p><strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C</p>
+										<p>
+											<strong>Temperatura:</strong> {result.temperature.toFixed(1)} °C
+											{result.idealTemperature && (
+												<span> (ideal: {result.idealTemperature}){result.temperatureInRange != null ? (result.temperatureInRange ? " ✓" : " ✗") : ""}</span>
+											)}
+										</p>
 									)}
 									{typeof result.humidity === "number" && (
-										<p><strong>Humedad:</strong> {result.humidity}%</p>
+										<p>
+											<strong>Humedad:</strong> {result.humidity}%
+											{result.idealHumidity && (
+												<span> (ideal: {result.idealHumidity}){result.humidityInRange != null ? (result.humidityInRange ? " ✓" : " ✗") : ""}</span>
+											)}
+										</p>
 									)}
 									{typeof result.altitude === "number" && (
 										<p><strong>Altitud:</strong> {Math.round(result.altitude)} m</p>
@@ -245,7 +223,6 @@ export default function Home() {
 									)}
 									<p><strong>Resumen:</strong> {result.summary}</p>
 									<p><strong>Recomendación:</strong> {result.recommendation}</p>
-									<p><strong>¿Interior?</strong> {result.indoorFriendly ? "Sí" : "No"}</p>
 								</div>
 							)}
 						</section>

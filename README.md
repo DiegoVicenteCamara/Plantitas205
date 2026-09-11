@@ -1,39 +1,99 @@
-# Plantitas
+# Plantitas205
 
-Aplicación con backend Spring Boot y frontend React para consultar recomendaciones de cuidado de plantas usando un catálogo local en base de datos H2 (memoria).
+A full-stack plant care assistant that provides personalized watering, lighting, and seasonal recommendations based on real-time weather data and geographic location.
 
-## Backend (Spring Boot + H2)
+## Tech Stack
 
-1. En una terminal:
-   - `cd backend`
-   - `./mvnw spring-boot:run` (Windows: `mvnw.cmd spring-boot:run`)
-2. API disponible en `http://localhost:8080`.
-3. Consola H2 disponible en `http://localhost:8080/h2-console`.
-   - JDBC URL: `jdbc:h2:mem:plantitasdb`
-   - User: `sa`
-   - Password: vacío
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Backend | Java + Spring Boot | 21 / 3.3.6 |
+| ORM | Spring Data JPA + Hibernate | - |
+| Database | H2 (in-memory) | - |
+| Resilience | Resilience4j (retry + cache) | 2.2.0 |
+| Frontend | React + Vite | 18 / 5.4 |
+| Maps | Leaflet + react-leaflet | 1.9 / 4.2 |
+| Styling | CSS Custom Properties (design tokens) | - |
+| Build | Maven / npm | 3.9 / 10 |
+| Testing | JUnit 5 + Mockito + MockMvc (backend), Vitest + React Testing Library (frontend) | - |
+| Coverage | JaCoCo | 0.8.12 |
+| AI Agents | Copilot + `.agents/skills/` framework | - |
 
-### Testing y cobertura (JaCoCo)
+## Quick Start
 
-- Ejecutar tests y generar reporte de cobertura:
-   - `cd backend`
-   - `mvnw.cmd verify` (Windows)
-- Reporte HTML disponible en:
-   - `backend/target/site/jacoco/index.html`
+### Backend
 
-## Frontend (React + Vite)
+```bash
+cd backend
+./mvnw spring-boot:run        # Linux/macOS
+mvnw.cmd spring-boot:run      # Windows
+```
 
-1. En otra terminal:
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
+- API: `http://localhost:8080`
+- H2 Console: `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:plantitasdb`, user: `sa`, no password)
 
-## Endpoints principales
+### Frontend
 
-- `POST /api/plant-care` para obtener recomendación por planta, ciudad y época.
-- `GET /api/plants/search?q=texto` para buscar plantas en el catálogo local.
-- `GET /api/plants/suggestions?prefix=Ma` para autocompletado por prefijo.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Variables de entorno
+- App: `http://localhost:5173`
 
-En frontend puedes definir `VITE_API_BASE_URL`; por defecto es `http://localhost:8080`.
+### Tests & Coverage
+
+**Backend:**
+```bash
+cd backend
+./mvnw verify                  # Linux/macOS
+mvnw.cmd verify                # Windows
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm test                        # single run
+npm run test:watch              # watch mode
+```
+
+Coverage report: `backend/target/site/jacoco/index.html`
+
+## Features
+
+- **Plant catalog** with 30 pre-seeded species (Monstera, Lavender, Aloe vera, etc.)
+- **Personalized care recommendations** combining plant requirements, season, and live weather
+- **Real-time weather** via Open-Meteo API with retry and caching
+- **Reverse geocoding** via Nominatim (OpenStreetMap) for city resolution
+- **Advanced search** with filters by category, light, water, and humidity levels
+- **Interactive map** (Leaflet) for location selection
+- **Dark mode** with CSS custom properties theming
+- **Responsive design** with mobile-first approach
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/plant-care` | Get care recommendation for a plant + location + season |
+| `GET` | `/api/plants/search` | Search plants with optional filters |
+| `GET` | `/api/plants/suggestions` | Autocomplete plant names by prefix |
+| `GET` | `/api/plants/{id}` | Get full plant details |
+
+See [docs/API.md](docs/API.md) for full endpoint documentation.
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend API base URL (frontend) |
+
+## Documentation
+
+- [Architecture & Data Flow](docs/ARCHITECTURE.md) -- System diagrams, integration patterns, resilience strategies
+- [Class Reference](docs/CLASSES.md) -- Full class-by-class reference with field/method listings and relationship diagrams
+- [Development Methodology](docs/METHODOLOGY.md) -- Git workflow, TDD, agent-assisted development, coding standards
+- [API Reference](docs/API.md) -- Endpoint details, request/response schemas, error handling
+
+## License
+
+This project is for educational purposes.

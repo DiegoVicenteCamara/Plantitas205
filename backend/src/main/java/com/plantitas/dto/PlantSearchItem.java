@@ -1,9 +1,11 @@
 package com.plantitas.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record PlantSearchItem(
 	Long id,
-	String common_name,
-	String scientific_name,
-	String image_url
+	@JsonProperty("common_name") String commonName,
+	@JsonProperty("scientific_name") String scientificName,
+	@JsonProperty("image_url") String imageUrl
 ) {
 }
